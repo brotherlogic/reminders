@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package reminders;
+
+message Reminder {
+  string text = 1;
+
+  // Where Sunday = 0
+  int32 day_of_week = 2;
+}
+
+message Empty {}
+
+message ReminderList {
+  repeated Reminder reminders = 1;
+}
+
+service Reminders {
+	rpc AddReminder(Reminder) returns (Empty) {};
+  rpc ListReminders(Empty) returns (ReminderList) {};
+}
