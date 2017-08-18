@@ -5,8 +5,11 @@ package reminders;
 message Reminder {
   string text = 1;
 
-  // Where Sunday = 0
-  int32 day_of_week = 2;
+  // Text day of the week
+  string day_of_week = 2;
+
+  // The time this should next be run
+  int64 next_run_time = 3;
 }
 
 message Empty {}
