@@ -2,6 +2,11 @@ syntax = "proto3";
 
 package reminders;
 
+message ReminderConfig {
+  ReminderList list = 1;
+  repeated TaskList tasks = 2;
+}
+
 message Reminder {
   string text = 1;
 
@@ -10,6 +15,18 @@ message Reminder {
 
   // The time this should next be run
   int64 next_run_time = 3;
+
+  // The state the task is in
+  enum ReminderState {
+    REPEATING = 0;
+    ASSIGNED = 1;
+    COMPLETE = 2;
+    UNASSIGNED = 3;
+  }
+  ReminderState current_state = 4;
+
+  // Assigned state for a github task
+  string github_id = 5;
 }
 
 message Empty {}
@@ -18,7 +35,13 @@ message ReminderList {
   repeated Reminder reminders = 1;
 }
 
+message TaskList {
+  string name = 1;
+  ReminderList tasks = 2;
+}
+
 service Reminders {
 	rpc AddReminder(Reminder) returns (Empty) {};
   rpc ListReminders(Empty) returns (ReminderList) {};
+  rpc AddTaskList(TaskList) returns (Empty) {};
 }

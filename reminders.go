@@ -15,7 +15,7 @@ import (
 
 // InitServer builds an initial server
 func InitServer() Server {
-	server := Server{GoServer: &goserver.GoServer{}, reminders: make([]*pb.Reminder, 0)}
+	server := Server{GoServer: &goserver.GoServer{}, data: &pb.ReminderConfig{}}
 	server.GoServer.KSclient = *keystoreclient.GetClient(server.GetIP)
 	return server
 }
@@ -32,6 +32,7 @@ func (s Server) Mote(master bool) error {
 
 // ReportHealth alerts if we're not healthy
 func (s Server) ReportHealth() bool {
+	log.Printf("REPORTING HEALTH")
 	return true
 }
 
