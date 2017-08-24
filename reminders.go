@@ -4,6 +4,7 @@ import (
 	"flag"
 	"io/ioutil"
 	"log"
+	"time"
 
 	"google.golang.org/grpc"
 
@@ -16,7 +17,22 @@ import (
 const (
 	//KEY under which we store the config data
 	KEY = "/github.com/brotherlogic/reminders/config"
+
+	//How long to wait between running a reminder loop
+	waitTime = time.Minute * 30
 )
+
+func (s *Server) processLoop() {
+	for true {
+		time.Sleep(waitTime)
+
+		s.refresh()
+		rs := s.getReminders(time.Now())
+		for _, r := range rs {
+			s.ghbridge.addIssue(r)
+		}
+	}
+}
 
 // InitServer builds an initial server
 func InitServer() Server {
@@ -73,6 +89,6 @@ func main() {
 	}
 	server.Register = server
 	server.RegisterServer("reminders", false)
-
+	server.RegisterServingTask(server.processLoop)
 	server.Serve()
 }
