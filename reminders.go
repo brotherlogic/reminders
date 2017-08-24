@@ -13,11 +13,31 @@ import (
 	pb "github.com/brotherlogic/reminders/proto"
 )
 
+const (
+	//KEY under which we store the config data
+	KEY = "/github.com/brotherlogic/reminders/config"
+)
+
 // InitServer builds an initial server
 func InitServer() Server {
 	server := Server{GoServer: &goserver.GoServer{}, data: &pb.ReminderConfig{}}
+	server.PrepServer()
 	server.GoServer.KSclient = *keystoreclient.GetClient(server.GetIP)
 	return server
+}
+
+func (s *Server) loadReminders() error {
+	config := &pb.ReminderConfig{}
+	log.Printf("%v and %v", KEY, config)
+	data, err := s.KSclient.Read(KEY, config)
+
+	if err != nil {
+		log.Printf("Unable to read collection: %v", err)
+		return err
+	}
+
+	s.data = data.(*pb.ReminderConfig)
+	return nil
 }
 
 // DoRegister does RPC registration
@@ -47,9 +67,11 @@ func main() {
 	}
 
 	server := InitServer()
-
+	err := server.loadReminders()
+	if err != nil {
+		log.Fatalf("Failed to load reminders: %v", err)
+	}
 	server.Register = server
-	server.PrepServer()
 	server.RegisterServer("reminders", false)
 
 	server.Serve()
