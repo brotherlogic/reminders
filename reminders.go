@@ -83,7 +83,7 @@ func (g gsGHBridge) isComplete(r *pb.Reminder) bool {
 
 // InitServer builds an initial server
 func InitServer() Server {
-	server := Server{GoServer: &goserver.GoServer{}, data: &pb.ReminderConfig{}}
+	server := Server{GoServer: &goserver.GoServer{}, data: &pb.ReminderConfig{List: &pb.ReminderList{Reminders: make([]*pb.Reminder, 0)}, Tasks: make([]*pb.TaskList, 0)}}
 	server.ghbridge = gsGHBridge{getter: server.GetIP}
 	server.PrepServer()
 	server.GoServer.KSclient = *keystoreclient.GetClient(server.GetIP)
