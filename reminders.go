@@ -39,6 +39,7 @@ func (s *Server) processLoop() {
 		for _, r := range rs {
 			s.ghbridge.addIssue(r)
 		}
+		s.saveReminders()
 	}
 }
 
@@ -102,6 +103,13 @@ func (s *Server) loadReminders() error {
 
 	//s.data = data.(*pb.ReminderConfig)
 	return nil
+}
+
+func (s *Server) saveReminders() error {
+	t := time.Now()
+	err := s.KSclient.Save(KEY, s.data)
+	s.LogFunction("saveReminders", t)
+	return err
 }
 
 // DoRegister does RPC registration

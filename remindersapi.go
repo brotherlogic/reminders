@@ -25,6 +25,7 @@ type githubBridge interface {
 func (s *Server) AddReminder(ctx context.Context, in *pb.Reminder) (*pb.Empty, error) {
 	t := time.Now()
 	s.data.List.Reminders = append(s.data.List.Reminders, in)
+	s.saveReminders()
 	s.LogFunction("AddReminder", t)
 	return &pb.Empty{}, nil
 }
@@ -46,6 +47,7 @@ func (s *Server) AddTaskList(ctx context.Context, in *pb.TaskList) (*pb.Empty, e
 	s.data.Tasks = append(s.data.Tasks, in)
 	s.processTaskList(in)
 
+	s.saveReminders()
 	s.LogFunction("AddTaskList", t)
 	return &pb.Empty{}, nil
 }
