@@ -32,22 +32,30 @@ func findServer(name string) (string, int) {
 
 func main() {
 
+	host, port := findServer("reminders")
+	conn, err := grpc.Dial(host+":"+strconv.Itoa(port), grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("Unable to dial: %v", err)
+	}
+	defer conn.Close()
+
+	client := pb.NewRemindersClient(conn)
+
 	if len(os.Args) <= 1 {
 		fmt.Printf("Commands: addlist\n")
 	} else {
 		switch os.Args[1] {
 		case "list":
-			host, port := findServer("reminders")
-			conn, err := grpc.Dial(host+":"+strconv.Itoa(port), grpc.WithInsecure())
-			if err != nil {
-				log.Fatalf("Unable to dial: %v", err)
-			}
-			defer conn.Close()
-
-			client := pb.NewRemindersClient(conn)
 			_, err = client.AddTaskList(context.Background(), &pb.TaskList{Name: "Testing", Tasks: &pb.ReminderList{Reminders: []*pb.Reminder{&pb.Reminder{Text: "This is task one"}, &pb.Reminder{Text: "This is task two"}}}})
 			if err != nil {
 				log.Fatalf("Error adding task list %v", err)
+			}
+		case "add":
+			reminder := os.Args[2]
+			day := os.Args[3]
+			_, err = client.AddReminder(context.Background(), &pb.Reminder{Text: reminder, DayOfWeek: day})
+			if err != nil {
+				log.Fatalf("Unable to add reminder: %v", err)
 			}
 		}
 	}
