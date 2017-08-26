@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	pbgh "github.com/brotherlogic/githubcard/proto"
 	pb "github.com/brotherlogic/reminders/proto"
 )
 
@@ -14,19 +15,6 @@ func (s *Server) refresh() {
 	}
 }
 
-func (s *Server) removeReminder(r *pb.Reminder) {
-	i := -1
-	for j, rem := range s.data.List.GetReminders() {
-		if rem.GetText() == r.GetText() {
-			i = j
-		}
-	}
-
-	if i >= 0 {
-		s.data.List.Reminders = append(s.data.List.Reminders[0:i], s.data.List.Reminders[i+1:len(s.data.List.Reminders)]...)
-	}
-}
-
 func (s *Server) processTaskList(t *pb.TaskList) {
 	for _, task := range t.Tasks.Reminders {
 		log.Printf("Task = %v (%v)", task, task.GetCurrentState())
@@ -34,12 +22,12 @@ func (s *Server) processTaskList(t *pb.TaskList) {
 		case pb.Reminder_UNASSIGNED:
 			task.CurrentState = pb.Reminder_ASSIGNED
 			task.GithubId = s.ghbridge.addIssue(task)
-			s.data.List.Reminders = append(s.data.List.Reminders, task)
+			s.last = &pbgh.Issue{Service: task.GithubId}
 			return
 		case pb.Reminder_ASSIGNED:
+			log.Printf("COMPLETE? %v", s.ghbridge.isComplete(task))
 			if s.ghbridge.isComplete(task) {
 				task.CurrentState = pb.Reminder_COMPLETE
-				s.removeReminder(task)
 			} else {
 				return
 			}
@@ -50,8 +38,10 @@ func (s *Server) processTaskList(t *pb.TaskList) {
 func (s *Server) getReminders(t time.Time) []*pb.Reminder {
 	reminders := make([]*pb.Reminder, 0)
 
+	log.Printf("HERE")
 	for _, r := range s.data.List.Reminders {
-		if r.NextRunTime < t.Unix() {
+		log.Printf("TESTING %v", r)
+		if r.NextRunTime < t.Unix() && r.GetDayOfWeek() != "" {
 			adjustRunTime(r)
 			reminders = append(reminders, r)
 		}
@@ -66,7 +56,8 @@ func adjustRunTime(r *pb.Reminder) {
 
 	for ct.Weekday().String() != r.DayOfWeek || ct.Before(t) {
 		ct = ct.AddDate(0, 0, 1)
-
+		log.Printf("%v -> %v", ct, t)
+		log.Printf("%v vs %v", ct.Weekday().String(), r.DayOfWeek)
 	}
 
 	log.Printf("Adjusted to: %v", ct)

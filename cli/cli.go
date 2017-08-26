@@ -37,7 +37,7 @@ func main() {
 	} else {
 		switch os.Args[1] {
 		case "list":
-			host, port := findServer("cardserver")
+			host, port := findServer("reminders")
 			conn, err := grpc.Dial(host+":"+strconv.Itoa(port), grpc.WithInsecure())
 			if err != nil {
 				log.Fatalf("Unable to dial: %v", err)
