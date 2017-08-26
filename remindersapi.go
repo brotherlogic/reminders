@@ -6,6 +6,7 @@ import (
 	"github.com/brotherlogic/goserver"
 	"golang.org/x/net/context"
 
+	pbd "github.com/brotherlogic/githubcard/proto"
 	pb "github.com/brotherlogic/reminders/proto"
 )
 
@@ -14,6 +15,7 @@ type Server struct {
 	*goserver.GoServer
 	data     *pb.ReminderConfig
 	ghbridge githubBridge
+	last     *pbd.Issue
 }
 
 type githubBridge interface {
@@ -25,7 +27,7 @@ type githubBridge interface {
 func (s *Server) AddReminder(ctx context.Context, in *pb.Reminder) (*pb.Empty, error) {
 	t := time.Now()
 	s.data.List.Reminders = append(s.data.List.Reminders, in)
-	s.saveReminders()
+	s.save()
 	s.LogFunction("AddReminder", t)
 	return &pb.Empty{}, nil
 }
@@ -47,7 +49,7 @@ func (s *Server) AddTaskList(ctx context.Context, in *pb.TaskList) (*pb.Empty, e
 	s.data.Tasks = append(s.data.Tasks, in)
 	s.processTaskList(in)
 
-	s.saveReminders()
+	s.save()
 	s.LogFunction("AddTaskList", t)
 	return &pb.Empty{}, nil
 }

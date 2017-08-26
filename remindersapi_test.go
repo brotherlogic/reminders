@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"testing"
 	"time"
 
@@ -45,31 +46,23 @@ func TestAddTaskList(t *testing.T) {
 	s.AddReminder(context.Background(), &pb.Reminder{Text: "This is a regular reminder", DayOfWeek: "Sunday"})
 	s.ghbridge.(testGHBridge).issues["This is Task One"] = "issue1"
 	s.ghbridge.(testGHBridge).issues["This is Task Two"] = "issue2"
+	log.Printf("BRIDGE: %v", s.ghbridge)
 	_, err := s.AddTaskList(context.Background(), &pb.TaskList{Name: "Testing", Tasks: &pb.ReminderList{Reminders: []*pb.Reminder{&pb.Reminder{Text: "This is Task One"}, &pb.Reminder{Text: "This is Task Two"}}}})
 	if err != nil {
 		t.Fatalf("Error adding task list: %v", err)
 	}
 
-	r, err := s.ListReminders(context.Background(), &pb.Empty{})
-	if err != nil {
-		t.Fatalf("Error getting reminders: %v", err)
-	}
-
-	if len(r.Reminders) != 2 || r.Reminders[1].GithubId != "issue1" {
-		t.Errorf("Reminders were not created: %v", r)
+	log.Printf("BRIDGE IS %v", s.ghbridge)
+	if s.last.Service != "issue1" {
+		t.Errorf("Reminders were not created: %v", s.last)
 	}
 
 	s.refresh()
 	s.ghbridge.(testGHBridge).completes["This is Task One"] = true
 	s.refresh()
 
-	r, err = s.ListReminders(context.Background(), &pb.Empty{})
-	if err != nil {
-		t.Fatalf("Error getting reminders: %v", err)
-	}
-
-	if len(r.Reminders) != 2 || r.Reminders[1].GithubId != "issue2" {
-		t.Errorf("Reminders were not refreshed: %v", r)
+	if s.last.Service != "issue2" {
+		t.Errorf("Reminders were not refreshed: %v", s.last)
 	}
 }
 
@@ -94,7 +87,7 @@ func TestAddList(t *testing.T) {
 func TestBuildReminders(t *testing.T) {
 	s := InitTestServer(".testaddlist")
 
-	_, err := s.AddReminder(context.Background(), &pb.Reminder{Text: "Hello", DayOfWeek: "Sunday"})
+	_, err := s.AddReminder(context.Background(), &pb.Reminder{Text: "Hello", DayOfWeek: "Monday"})
 	if err != nil {
 		t.Fatalf("Error adding reminder: %v", err)
 	}
@@ -104,6 +97,8 @@ func TestBuildReminders(t *testing.T) {
 	if len(rs) != 1 {
 		t.Fatalf("Wrong number of reminders")
 	}
+
+	log.Printf("Running second pass")
 
 	t2 := t1.Add(time.Hour * 24)
 	rs = s.getReminders(t2)

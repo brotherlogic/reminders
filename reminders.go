@@ -23,7 +23,7 @@ const (
 	KEY = "/github.com/brotherlogic/reminders/config"
 
 	//How long to wait between running a reminder loop
-	waitTime = time.Minute * 30
+	waitTime = time.Minute * 5
 )
 
 type gsGHBridge struct {
@@ -32,14 +32,18 @@ type gsGHBridge struct {
 
 func (s *Server) processLoop() {
 	for true {
+		log.Printf("SLEEPING FOR %v", waitTime)
 		time.Sleep(waitTime)
+		log.Printf("SLEPT")
 
 		s.refresh()
+		log.Printf("GOT REFRESH")
 		rs := s.getReminders(time.Now())
+		log.Printf("GOT REMINDERS")
 		for _, r := range rs {
 			s.ghbridge.addIssue(r)
 		}
-		s.saveReminders()
+		s.save()
 	}
 }
 
@@ -64,6 +68,7 @@ func (g gsGHBridge) addIssue(r *pb.Reminder) string {
 
 func (g gsGHBridge) isComplete(r *pb.Reminder) bool {
 	ip, port := g.getter("githubcard")
+	log.Printf("DIALLING: %v, %v", ip, port)
 	conn, err := grpc.Dial(ip+":"+strconv.Itoa(port), grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Failed to dial ghc: %v", err)
@@ -77,9 +82,17 @@ func (g gsGHBridge) isComplete(r *pb.Reminder) bool {
 	resp, err := client.Get(context.Background(), &pbgh.Issue{Number: int32(num), Service: elems[0]})
 	if err != nil {
 		log.Printf("Failed to get issue: %v", err)
+		return false
 	}
 
+	log.Printf("COME BACK: %v-> %v", &pbgh.Issue{Number: int32(num), Service: elems[0]}, resp)
 	return resp.GetState() == pbgh.Issue_CLOSED
+}
+
+func (s *Server) save() {
+	t := time.Now()
+	s.KSclient.Save(KEY, s.data)
+	s.LogFunction("save", t)
 }
 
 // InitServer builds an initial server
@@ -105,13 +118,6 @@ func (s *Server) loadReminders() error {
 	return nil
 }
 
-func (s *Server) saveReminders() error {
-	t := time.Now()
-	err := s.KSclient.Save(KEY, s.data)
-	s.LogFunction("saveReminders", t)
-	return err
-}
-
 // DoRegister does RPC registration
 func (s Server) DoRegister(server *grpc.Server) {
 	pb.RegisterRemindersServer(server, &s)
@@ -124,7 +130,6 @@ func (s Server) Mote(master bool) error {
 
 // ReportHealth alerts if we're not healthy
 func (s Server) ReportHealth() bool {
-	log.Printf("REPORTING HEALTH")
 	return true
 }
 
@@ -146,5 +151,8 @@ func main() {
 	server.Register = server
 	server.RegisterServer("reminders", false)
 	server.RegisterServingTask(server.processLoop)
+
+	log.Printf("Initial Config: %v", server.data)
+
 	server.Serve()
 }
