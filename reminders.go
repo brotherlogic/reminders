@@ -23,7 +23,7 @@ const (
 	KEY = "/github.com/brotherlogic/reminders/config"
 
 	//How long to wait between running a reminder loop
-	waitTime = time.Minute * 5
+	waitTime = time.Hour * 2
 )
 
 type gsGHBridge struct {
