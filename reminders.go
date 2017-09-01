@@ -57,7 +57,7 @@ func (g gsGHBridge) addIssue(r *pb.Reminder) string {
 	defer conn.Close()
 
 	client := pbgh.NewGithubClient(conn)
-	resp, err := client.AddIssue(context.Background(), &pbgh.Issue{Service: "Home", Title: r.GetText()})
+	resp, err := client.AddIssue(context.Background(), &pbgh.Issue{Service: r.GetGithubComponent(), Title: r.GetText()})
 	if err != nil {
 		log.Printf("Add issue failed: %v", err)
 		return ""
