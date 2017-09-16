@@ -45,6 +45,6 @@ message TaskList {
 
 service Reminders {
 	rpc AddReminder(Reminder) returns (Empty) {};
-  rpc ListReminders(Empty) returns (ReminderList) {};
+  rpc ListReminders(Empty) returns (ReminderConfig) {};
   rpc AddTaskList(TaskList) returns (Empty) {};
 }
