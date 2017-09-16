@@ -32,10 +32,6 @@ type gsGHBridge struct {
 
 func (s *Server) processLoop() {
 	for true {
-		log.Printf("SLEEPING FOR %v", waitTime)
-		time.Sleep(waitTime)
-		log.Printf("SLEPT")
-
 		s.refresh()
 		log.Printf("GOT REFRESH")
 		rs := s.getReminders(time.Now())
@@ -44,6 +40,10 @@ func (s *Server) processLoop() {
 			s.ghbridge.addIssue(r)
 		}
 		s.save()
+
+		log.Printf("SLEEPING FOR %v", waitTime)
+		time.Sleep(waitTime)
+		log.Printf("SLEPT")
 	}
 }
 
@@ -79,6 +79,11 @@ func (g gsGHBridge) isComplete(r *pb.Reminder) bool {
 	client := pbgh.NewGithubClient(conn)
 	elems := strings.Split(r.GetGithubId(), "/")
 	num, _ := strconv.Atoi(elems[1])
+	log.Printf("GETTING NOW %v and %v", num, elems[0])
+	if len(elems[0]) == 0 || num == 0 {
+		//Can't process this, so just return true
+		return true
+	}
 	resp, err := client.Get(context.Background(), &pbgh.Issue{Number: int32(num), Service: elems[0]})
 	if err != nil {
 		log.Printf("Failed to get issue: %v", err)
