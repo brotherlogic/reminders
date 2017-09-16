@@ -33,8 +33,8 @@ func (s *Server) AddReminder(ctx context.Context, in *pb.Reminder) (*pb.Empty, e
 }
 
 //ListReminders lists all the available reminders
-func (s *Server) ListReminders(ctx context.Context, in *pb.Empty) (*pb.ReminderList, error) {
-	return s.data.List, nil
+func (s *Server) ListReminders(ctx context.Context, in *pb.Empty) (*pb.ReminderConfig, error) {
+	return s.data, nil
 }
 
 //AddTaskList adds a task list into the system

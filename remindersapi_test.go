@@ -79,7 +79,7 @@ func TestAddList(t *testing.T) {
 		t.Fatalf("Error listing reminders: %v", err)
 	}
 
-	if len(rs.Reminders) != 1 {
+	if len(rs.GetList().Reminders) != 1 {
 		t.Errorf("Error getting reminders: %v", rs)
 	}
 }
