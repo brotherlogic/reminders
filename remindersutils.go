@@ -40,8 +40,8 @@ func (s *Server) getReminders(t time.Time) []*pb.Reminder {
 
 	log.Printf("HERE")
 	for _, r := range s.data.List.Reminders {
-		log.Printf("TESTING %v", r)
-		if r.NextRunTime < t.Unix() && r.GetDayOfWeek() != "" {
+		log.Printf("TESTING %v and %v", r, r.NextRunTime-t.Unix())
+		if r.NextRunTime < t.Unix() {
 			adjustRunTime(r)
 			reminders = append(reminders, r)
 		}
@@ -54,10 +54,15 @@ func adjustRunTime(r *pb.Reminder) {
 	t := time.Now()
 	ct := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 
-	for ct.Weekday().String() != r.DayOfWeek || ct.Before(t) {
-		ct = ct.AddDate(0, 0, 1)
-		log.Printf("%v -> %v", ct, t)
-		log.Printf("%v vs %v", ct.Weekday().String(), r.DayOfWeek)
+	switch r.RepeatPeriod {
+	case pb.Reminder_WEEKLY:
+		for ct.Weekday().String() != r.DayOfWeek || ct.Before(t) {
+			ct = ct.AddDate(0, 0, 1)
+			log.Printf("%v -> %v", ct, t)
+			log.Printf("%v vs %v", ct.Weekday().String(), r.DayOfWeek)
+		}
+	case pb.Reminder_MONTHLY:
+		ct = ct.AddDate(0, 1, 0)
 	}
 
 	log.Printf("Adjusted to: %v", ct)

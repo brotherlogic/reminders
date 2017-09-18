@@ -25,11 +25,18 @@ message Reminder {
   }
   ReminderState current_state = 4;
 
+  // Assigned state for a github task
+  string github_id = 5;
+
   // The component this should filed against in la github
   string github_component = 6;
 
-  // Assigned state for a github task
-  string github_id = 5;
+  enum ReminderPeriod {
+    WEEKLY = 0;
+    MONTHLY = 1;
+  }
+
+  ReminderPeriod repeatPeriod = 7;
 }
 
 message Empty {}
