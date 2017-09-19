@@ -107,10 +107,56 @@ func TestMonthlyReminder(t *testing.T) {
 	}
 }
 
+func TestSixMonthReminder(t *testing.T) {
+	s := InitTestServer(".testmonthlyreminder")
+
+	_, err := s.AddReminder(context.Background(), &pb.Reminder{Text: "Hello", NextRunTime: time.Now().Unix(), RepeatPeriod: pb.Reminder_HALF_YEARLY})
+	if err != nil {
+		t.Fatalf("Error adding reminder: %v", err)
+	}
+
+	t1 := time.Now().Add(time.Second)
+	rs := s.getReminders(t1)
+	if len(rs) != 1 {
+		t.Fatalf("Wrong number of reminders")
+	}
+
+	t2 := rs[0].NextRunTime
+	dt1 := time.Unix(t1.Unix(), 0)
+	dt2 := time.Unix(t2, 0)
+
+	if dt2.Sub(dt1).Hours() < 5*30*24 {
+		t.Errorf("Run time %v should be a month after %v", dt2, dt1)
+	}
+}
+
+func TestYearlyReminder(t *testing.T) {
+	s := InitTestServer(".testmonthlyreminder")
+
+	_, err := s.AddReminder(context.Background(), &pb.Reminder{Text: "Hello", NextRunTime: time.Now().Unix(), RepeatPeriod: pb.Reminder_YEARLY})
+	if err != nil {
+		t.Fatalf("Error adding reminder: %v", err)
+	}
+
+	t1 := time.Now().Add(time.Second)
+	rs := s.getReminders(t1)
+	if len(rs) != 1 {
+		t.Fatalf("Wrong number of reminders")
+	}
+
+	t2 := rs[0].NextRunTime
+	dt1 := time.Unix(t1.Unix(), 0)
+	dt2 := time.Unix(t2, 0)
+
+	if dt1.Year() == dt2.Year() {
+		t.Errorf("Run time %v should be a year after %v", dt2, dt1)
+	}
+}
+
 func TestBuildReminders(t *testing.T) {
 	s := InitTestServer(".testaddlist")
 
-	_, err := s.AddReminder(context.Background(), &pb.Reminder{Text: "Hello", DayOfWeek: "Wednesday"})
+	_, err := s.AddReminder(context.Background(), &pb.Reminder{Text: "Hello", DayOfWeek: "Friday"})
 	if err != nil {
 		t.Fatalf("Error adding reminder: %v", err)
 	}

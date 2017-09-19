@@ -34,6 +34,8 @@ message Reminder {
   enum ReminderPeriod {
     WEEKLY = 0;
     MONTHLY = 1;
+    YEARLY = 2;
+    HALF_YEARLY = 3;
   }
 
   ReminderPeriod repeatPeriod = 7;

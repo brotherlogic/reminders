@@ -63,6 +63,10 @@ func adjustRunTime(r *pb.Reminder) {
 		}
 	case pb.Reminder_MONTHLY:
 		ct = ct.AddDate(0, 1, 0)
+	case pb.Reminder_YEARLY:
+		ct = ct.AddDate(1, 0, 0)
+	case pb.Reminder_HALF_YEARLY:
+		ct = ct.AddDate(0, 6, 0)
 	}
 
 	log.Printf("Adjusted to: %v", ct)
