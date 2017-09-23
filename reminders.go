@@ -35,7 +35,7 @@ func (s *Server) processLoop() {
 		s.refresh()
 		log.Printf("GOT REFRESH")
 		rs := s.getReminders(time.Now())
-		log.Printf("GOT REMINDERS")
+		s.Log("Got reminders (" + strconv.Itoa(len(rs)) + ")")
 		for _, r := range rs {
 			s.ghbridge.addIssue(r)
 		}
