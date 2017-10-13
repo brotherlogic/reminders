@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -40,7 +41,7 @@ func (s *Server) getReminders(t time.Time) []*pb.Reminder {
 
 	log.Printf("HERE")
 	for _, r := range s.data.List.Reminders {
-		log.Printf("TESTING %v and %v", r, r.NextRunTime-t.Unix())
+		s.Log(fmt.Sprintf("TESTING %v and %v", r, r.NextRunTime-t.Unix()))
 		if r.NextRunTime < t.Unix() {
 			adjustRunTime(r)
 			reminders = append(reminders, r)
