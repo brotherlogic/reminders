@@ -24,6 +24,7 @@ func (s *Server) processTaskList(t *pb.TaskList) {
 			task.CurrentState = pb.Reminder_ASSIGNED
 			task.GithubId = s.ghbridge.addIssue(task)
 			s.last = &pbgh.Issue{Service: task.GithubId}
+			s.save()
 			return
 		case pb.Reminder_ASSIGNED:
 			log.Printf("COMPLETE? %v", s.ghbridge.isComplete(task))
