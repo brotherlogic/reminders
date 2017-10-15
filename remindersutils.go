@@ -19,6 +19,12 @@ func (s *Server) refresh() {
 func (s *Server) processTaskList(t *pb.TaskList) {
 	for _, task := range t.Tasks.Reminders {
 		log.Printf("Task = %v (%v)", task, task.GetCurrentState())
+
+		//Reassign a task with an empty id
+		if task.GetGithubId() == "" {
+			task.CurrentState = pb.Reminder_UNASSIGNED
+		}
+
 		switch task.GetCurrentState() {
 		case pb.Reminder_UNASSIGNED:
 			task.CurrentState = pb.Reminder_ASSIGNED
