@@ -12,11 +12,12 @@ import (
 	"google.golang.org/grpc"
 
 	pbdi "github.com/brotherlogic/discovery/proto"
+	"github.com/brotherlogic/goserver/utils"
 	pb "github.com/brotherlogic/reminders/proto"
 )
 
 func findServer(name string) (string, int) {
-	conn, err := grpc.Dial("192.168.86.42:50055", grpc.WithInsecure())
+	conn, err := grpc.Dial(utils.RegistryIP+":"+strconv.Itoa(utils.RegistryPort), grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Cannot reach discover server: %v (trying to discover %v)", err, name)
 	}
