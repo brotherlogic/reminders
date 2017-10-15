@@ -139,7 +139,7 @@ func (s Server) ReportHealth() bool {
 }
 
 func main() {
-	var quiet = flag.Bool("quiet", false, "Show all output")
+	var quiet = flag.Bool("quiet", true, "Show all output")
 	flag.Parse()
 
 	//Turn off logging
@@ -151,7 +151,9 @@ func main() {
 	server := InitServer()
 	err := server.loadReminders()
 	if err != nil {
-		log.Fatalf("Failed to load reminders: %v", err)
+		//Quiet fail on crash on load
+		log.Printf("Failed to load reminders: %v", err)
+		return
 	}
 	server.Register = server
 	server.RegisterServer("reminders", false)
