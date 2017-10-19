@@ -52,7 +52,7 @@ func (g gsGHBridge) addIssue(r *pb.Reminder) string {
 	conn, err := grpc.Dial(ip+":"+strconv.Itoa(port), grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Failed to dial ghc: %v", err)
-		return ""
+		return "ERR"
 	}
 	defer conn.Close()
 

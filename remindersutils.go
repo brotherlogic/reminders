@@ -29,6 +29,7 @@ func (s *Server) processTaskList(t *pb.TaskList) {
 		case pb.Reminder_UNASSIGNED:
 			task.CurrentState = pb.Reminder_ASSIGNED
 			task.GithubId = s.ghbridge.addIssue(task)
+			s.Log(fmt.Sprintf("Assigned %v", task))
 			s.last = &pbgh.Issue{Service: task.GithubId}
 			s.save()
 			return
