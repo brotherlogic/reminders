@@ -47,12 +47,12 @@ func (s *Server) processLoop() {
 	}
 }
 
-func (g gsGHBridge) addIssue(r *pb.Reminder) string {
+func (g gsGHBridge) addIssue(r *pb.Reminder) (string, error) {
 	ip, port := g.getter("githubcard")
 	conn, err := grpc.Dial(ip+":"+strconv.Itoa(port), grpc.WithInsecure())
 	if err != nil {
 		log.Printf("Failed to dial ghc: %v", err)
-		return "ERR"
+		return "", err
 	}
 	defer conn.Close()
 
@@ -60,10 +60,10 @@ func (g gsGHBridge) addIssue(r *pb.Reminder) string {
 	resp, err := client.AddIssue(context.Background(), &pbgh.Issue{Service: r.GetGithubComponent(), Title: r.GetText()})
 	if err != nil {
 		log.Printf("Add issue failed: %v", err)
-		return ""
+		return "", err
 	}
 
-	return resp.GetService() + "/" + strconv.Itoa(int(resp.GetNumber()))
+	return resp.GetService() + "/" + strconv.Itoa(int(resp.GetNumber())), nil
 }
 
 func (g gsGHBridge) isComplete(r *pb.Reminder) bool {

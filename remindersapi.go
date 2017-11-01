@@ -20,7 +20,7 @@ type Server struct {
 
 type githubBridge interface {
 	isComplete(t *pb.Reminder) bool
-	addIssue(t *pb.Reminder) string
+	addIssue(t *pb.Reminder) (string, error)
 }
 
 //AddReminder adds a reminder into the system

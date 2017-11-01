@@ -24,11 +24,11 @@ func (githubBridge testGHBridge) isComplete(t *pb.Reminder) bool {
 	return false
 }
 
-func (githubBridge testGHBridge) addIssue(t *pb.Reminder) string {
+func (githubBridge testGHBridge) addIssue(t *pb.Reminder) (string, error) {
 	if val, ok := githubBridge.issues[t.GetText()]; ok {
-		return val
+		return val, nil
 	}
-	return "added"
+	return "added", nil
 }
 
 func InitTestServer(foldername string) Server {

@@ -18,7 +18,7 @@ func (s *Server) refresh() {
 
 func (s *Server) processTaskList(t *pb.TaskList) {
 	for _, task := range t.Tasks.Reminders {
-		log.Printf("Task = %v (%v)", task, task.GetCurrentState())
+		s.Log(fmt.Sprintf("Task = %v (%v)", task, task.GetCurrentState()))
 
 		//Reassign a task with an empty id
 		if task.GetGithubId() == "" {
@@ -28,10 +28,14 @@ func (s *Server) processTaskList(t *pb.TaskList) {
 		switch task.GetCurrentState() {
 		case pb.Reminder_UNASSIGNED:
 			task.CurrentState = pb.Reminder_ASSIGNED
-			task.GithubId = s.ghbridge.addIssue(task)
-			s.Log(fmt.Sprintf("Assigned %v", task))
-			s.last = &pbgh.Issue{Service: task.GithubId}
-			s.save()
+			t, err := s.ghbridge.addIssue(task)
+			if err == nil {
+				task.GithubId = t
+				s.last = &pbgh.Issue{Service: task.GithubId}
+				s.save()
+			}
+			s.Log(fmt.Sprintf("Assigned %v with %v", task, err))
+
 			return
 		case pb.Reminder_ASSIGNED:
 			log.Printf("COMPLETE? %v", s.ghbridge.isComplete(task))
