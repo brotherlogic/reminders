@@ -13,9 +13,10 @@ import (
 //Server is the main server
 type Server struct {
 	*goserver.GoServer
-	data     *pb.ReminderConfig
-	ghbridge githubBridge
-	last     *pbd.Issue
+	data         *pb.ReminderConfig
+	ghbridge     githubBridge
+	last         *pbd.Issue
+	lastBasicRun time.Time
 }
 
 type githubBridge interface {

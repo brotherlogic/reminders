@@ -15,6 +15,7 @@ import (
 	"github.com/brotherlogic/keystore/client"
 
 	pbgh "github.com/brotherlogic/githubcard/proto"
+	pbg "github.com/brotherlogic/goserver/proto"
 	pb "github.com/brotherlogic/reminders/proto"
 )
 
@@ -32,6 +33,7 @@ type gsGHBridge struct {
 
 func (s *Server) processLoop() {
 	for true {
+		s.lastBasicRun = time.Now()
 		s.refresh()
 		log.Printf("GOT REFRESH")
 		rs := s.getReminders(time.Now())
@@ -136,6 +138,11 @@ func (s Server) Mote(master bool) error {
 // ReportHealth alerts if we're not healthy
 func (s Server) ReportHealth() bool {
 	return true
+}
+
+// GetState gets the state of the server
+func (s Server) GetState() []*pbg.State {
+	return []*pbg.State{&pbg.State{Key: "last_update_time", TimeValue: s.lastBasicRun.Unix()}}
 }
 
 func main() {
