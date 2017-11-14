@@ -114,7 +114,7 @@ func InitServer() Server {
 func (s *Server) loadReminders() error {
 	config := &pb.ReminderConfig{}
 	log.Printf("%v and %v", KEY, config)
-	data, err := s.KSclient.Read(KEY, config)
+	data, _, err := s.KSclient.Read(KEY, config)
 
 	if err != nil {
 		log.Printf("Unable to read collection: %v", err)
