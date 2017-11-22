@@ -72,7 +72,7 @@ func adjustRunTime(r *pb.Reminder) {
 		for (r.DayOfWeek == "" || ct.Weekday().String() != r.DayOfWeek) || ct.Before(t) {
 			ct = ct.AddDate(0, 0, 1)
 			log.Printf("%v -> %v", ct, t)
-			log.Printf("%v vs %v", ct.Weekday().String(), r.DayOfWeek)
+			log.Printf("%v vs %v but %v", ct.Weekday().String(), r.DayOfWeek, len(r.DayOfWeek))
 		}
 	case pb.Reminder_MONTHLY:
 		ct = ct.AddDate(0, 1, 0)
