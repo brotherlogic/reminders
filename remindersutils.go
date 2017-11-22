@@ -69,7 +69,7 @@ func adjustRunTime(r *pb.Reminder) {
 
 	switch r.RepeatPeriod {
 	case pb.Reminder_WEEKLY:
-		for ct.Weekday().String() != r.DayOfWeek || ct.Before(t) {
+		for (r.DayOfWeek == "" || ct.Weekday().String() != r.DayOfWeek) || ct.Before(t) {
 			ct = ct.AddDate(0, 0, 1)
 			log.Printf("%v -> %v", ct, t)
 			log.Printf("%v vs %v", ct.Weekday().String(), r.DayOfWeek)
