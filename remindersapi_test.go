@@ -31,8 +31,8 @@ func (githubBridge testGHBridge) addIssue(t *pb.Reminder) (string, error) {
 	return "added", nil
 }
 
-func InitTestServer(foldername string) Server {
-	server := Server{data: &pb.ReminderConfig{List: &pb.ReminderList{Reminders: make([]*pb.Reminder, 0)}, Tasks: make([]*pb.TaskList, 0)}, ghbridge: testGHBridge{completes: make(map[string]bool), issues: make(map[string]string)}}
+func InitTestServer(foldername string) *Server {
+	server := &Server{data: &pb.ReminderConfig{List: &pb.ReminderList{Reminders: make([]*pb.Reminder, 0)}, Tasks: make([]*pb.TaskList, 0)}, ghbridge: testGHBridge{completes: make(map[string]bool), issues: make(map[string]string)}}
 	server.GoServer = &goserver.GoServer{}
 	server.SkipLog = true
 	server.Register = server

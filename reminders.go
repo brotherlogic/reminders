@@ -103,8 +103,8 @@ func (s *Server) save() {
 }
 
 // InitServer builds an initial server
-func InitServer() Server {
-	server := Server{GoServer: &goserver.GoServer{}, data: &pb.ReminderConfig{List: &pb.ReminderList{Reminders: make([]*pb.Reminder, 0)}, Tasks: make([]*pb.TaskList, 0)}}
+func InitServer() *Server {
+	server := &Server{GoServer: &goserver.GoServer{}, data: &pb.ReminderConfig{List: &pb.ReminderList{Reminders: make([]*pb.Reminder, 0)}, Tasks: make([]*pb.TaskList, 0)}}
 	server.ghbridge = gsGHBridge{getter: server.GetIP}
 	server.PrepServer()
 	server.GoServer.KSclient = *keystoreclient.GetClient(server.GetIP)
@@ -126,22 +126,22 @@ func (s *Server) loadReminders() error {
 }
 
 // DoRegister does RPC registration
-func (s Server) DoRegister(server *grpc.Server) {
-	pb.RegisterRemindersServer(server, &s)
+func (s *Server) DoRegister(server *grpc.Server) {
+	pb.RegisterRemindersServer(server, s)
 }
 
 // Mote promotes/demotes this server
-func (s Server) Mote(master bool) error {
+func (s *Server) Mote(master bool) error {
 	return nil
 }
 
 // ReportHealth alerts if we're not healthy
-func (s Server) ReportHealth() bool {
+func (s *Server) ReportHealth() bool {
 	return true
 }
 
 // GetState gets the state of the server
-func (s Server) GetState() []*pbg.State {
+func (s *Server) GetState() []*pbg.State {
 	return []*pbg.State{&pbg.State{Key: "last_update_time", TimeValue: s.lastBasicRun.Unix()}}
 }
 
