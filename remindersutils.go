@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	pbgh "github.com/brotherlogic/githubcard/proto"
@@ -10,7 +9,6 @@ import (
 )
 
 func (s *Server) refresh() {
-	log.Printf("Refreshing")
 	for _, tl := range s.data.GetTasks() {
 		s.processTaskList(tl)
 	}
@@ -38,7 +36,6 @@ func (s *Server) processTaskList(t *pb.TaskList) {
 
 			return
 		case pb.Reminder_ASSIGNED:
-			log.Printf("COMPLETE? %v", s.ghbridge.isComplete(task))
 			if s.ghbridge.isComplete(task) {
 				task.CurrentState = pb.Reminder_COMPLETE
 			} else {
@@ -51,7 +48,6 @@ func (s *Server) processTaskList(t *pb.TaskList) {
 func (s *Server) getReminders(t time.Time) []*pb.Reminder {
 	reminders := make([]*pb.Reminder, 0)
 
-	log.Printf("HERE")
 	for _, r := range s.data.List.Reminders {
 		s.Log(fmt.Sprintf("TESTING %v and %v", r, r.NextRunTime-t.Unix()))
 		if r.NextRunTime < t.Unix() {
@@ -71,8 +67,6 @@ func adjustRunTime(r *pb.Reminder) {
 	case pb.Reminder_WEEKLY:
 		for (r.DayOfWeek != "" && ct.Weekday().String() != r.DayOfWeek) || ct.Before(t) {
 			ct = ct.AddDate(0, 0, 1)
-			log.Printf("%v -> %v", ct, t)
-			log.Printf("%v vs %v but %v", ct.Weekday().String(), r.DayOfWeek, len(r.DayOfWeek))
 		}
 	case pb.Reminder_MONTHLY:
 		ct = ct.AddDate(0, 1, 0)
@@ -82,6 +76,5 @@ func adjustRunTime(r *pb.Reminder) {
 		ct = ct.AddDate(0, 6, 0)
 	}
 
-	log.Printf("Adjusted to: %v", ct)
 	r.NextRunTime = ct.Unix()
 }
