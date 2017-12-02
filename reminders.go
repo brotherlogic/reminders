@@ -22,9 +22,6 @@ import (
 const (
 	//KEY under which we store the config data
 	KEY = "/github.com/brotherlogic/reminders/config"
-
-	//How long to wait between running a reminder loop
-	waitTime = time.Hour * 2
 )
 
 type gsGHBridge struct {
@@ -32,18 +29,14 @@ type gsGHBridge struct {
 }
 
 func (s *Server) processLoop() {
-	for true {
-		s.lastBasicRun = time.Now()
-		s.refresh()
-		rs := s.getReminders(time.Now())
-		s.Log("Got reminders (" + strconv.Itoa(len(rs)) + ")")
-		for _, r := range rs {
-			s.ghbridge.addIssue(r)
-		}
-		s.save()
-
-		time.Sleep(waitTime)
+	s.lastBasicRun = time.Now()
+	s.refresh()
+	rs := s.getReminders(time.Now())
+	s.Log("Got reminders (" + strconv.Itoa(len(rs)) + ")")
+	for _, r := range rs {
+		s.ghbridge.addIssue(r)
 	}
+	s.save()
 }
 
 func (g gsGHBridge) addIssue(r *pb.Reminder) (string, error) {
@@ -151,7 +144,9 @@ func main() {
 	}
 	server.Register = server
 	server.RegisterServer("reminders", false)
-	server.RegisterServingTask(server.processLoop)
+
+	//Update the tasks every 24 hours
+	server.RegisterRepeatingTask(server.processLoop, time.Hour*24)
 
 	server.Serve()
 }
