@@ -29,3 +29,6 @@ discogssyncer
 .testfolder
 hash
 reminders
+
+cli/*.txt
+cli/cli
