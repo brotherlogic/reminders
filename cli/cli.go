@@ -8,12 +8,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/brotherlogic/goserver/utils"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
 	pbdi "github.com/brotherlogic/discovery/proto"
-	"github.com/brotherlogic/goserver/utils"
 	pb "github.com/brotherlogic/reminders/proto"
+
+	_ "google.golang.org/grpc/encoding/gzip"
 )
 
 func findServer(name string) (string, int) {

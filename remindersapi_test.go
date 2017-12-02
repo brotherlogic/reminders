@@ -52,6 +52,9 @@ func TestAddTaskList(t *testing.T) {
 		t.Fatalf("Error adding task list: %v", err)
 	}
 
+	// Sleep to allow stuff to process
+	time.Sleep(time.Second)
+
 	log.Printf("BRIDGE IS %v", s.ghbridge)
 	if s.last.Service != "issue1" {
 		t.Errorf("Reminders were not created: %v", s.last)

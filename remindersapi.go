@@ -48,9 +48,9 @@ func (s *Server) AddTaskList(ctx context.Context, in *pb.TaskList) (*pb.Empty, e
 	}
 
 	s.data.Tasks = append(s.data.Tasks, in)
-	s.processTaskList(in)
-
 	s.save()
+	go s.processTaskList(in)
+
 	s.LogFunction("AddTaskList", t)
 	return &pb.Empty{}, nil
 }
