@@ -27,7 +27,7 @@ func findServer(name string) (string, int) {
 	r, err := registry.Discover(context.Background(), &pbdi.RegistryEntry{Name: name})
 
 	if err != nil {
-		log.Printf("Failure to list: %v", err)
+		log.Fatalf("Failure to list: %v", err)
 		return "", -1
 	}
 	return r.Ip, int(r.Port)
