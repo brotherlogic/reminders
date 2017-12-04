@@ -64,6 +64,8 @@ func adjustRunTime(r *pb.Reminder) {
 	ct := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 
 	switch r.RepeatPeriod {
+	case pb.Reminder_DAILY:
+		ct = ct.AddDate(0, 0, 1)
 	case pb.Reminder_WEEKLY:
 		for (r.DayOfWeek != "" && ct.Weekday().String() != r.DayOfWeek) || ct.Before(t) {
 			ct = ct.AddDate(0, 0, 1)
