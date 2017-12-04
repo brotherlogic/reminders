@@ -84,6 +84,29 @@ func TestAddList(t *testing.T) {
 	}
 }
 
+func TestDailyReminder(t *testing.T) {
+	s := InitTestServer(".testmonthlyreminder")
+
+	_, err := s.AddReminder(context.Background(), &pb.Reminder{Text: "Hello", NextRunTime: time.Now().Unix(), RepeatPeriod: pb.Reminder_DAILY})
+	if err != nil {
+		t.Fatalf("Error adding reminder: %v", err)
+	}
+
+	t1 := time.Now().Add(time.Second)
+	rs := s.getReminders(t1)
+	if len(rs) != 1 {
+		t.Fatalf("Wrong number of reminders")
+	}
+
+	t2 := rs[0].NextRunTime
+	dt1 := time.Unix(t1.Unix(), 0)
+	dt2 := time.Unix(t2, 0)
+
+	if dt2.Day() != dt1.Day()+1 {
+		t.Errorf("Run time %v should be the day after %v", dt2, dt1)
+	}
+}
+
 func TestMonthlyReminder(t *testing.T) {
 	s := InitTestServer(".testmonthlyreminder")
 
