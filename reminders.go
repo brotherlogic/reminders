@@ -80,9 +80,7 @@ func (g gsGHBridge) isComplete(r *pb.Reminder) bool {
 }
 
 func (s *Server) save() {
-	t := time.Now()
 	s.KSclient.Save(KEY, s.data)
-	s.LogFunction("save", t)
 }
 
 // InitServer builds an initial server
