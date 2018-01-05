@@ -58,8 +58,8 @@ func main() {
 			fmt.Printf("%v", rs)
 		case "add":
 			reminder := os.Args[2]
-			day := os.Args[3]
-			_, err = client.AddReminder(context.Background(), &pb.Reminder{Text: reminder, DayOfWeek: day})
+			//day := os.Args[3]
+			_, err = client.AddReminder(context.Background(), &pb.Reminder{Text: reminder, RepeatPeriod: pb.Reminder_DAILY})
 			if err != nil {
 				log.Fatalf("Unable to add reminder: %v", err)
 			}
