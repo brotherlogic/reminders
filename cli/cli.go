@@ -8,12 +8,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/brotherlogic/goserver/utils"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
 	pbdi "github.com/brotherlogic/discovery/proto"
-	"github.com/brotherlogic/goserver/utils"
 	pb "github.com/brotherlogic/reminders/proto"
+
+	_ "google.golang.org/grpc/encoding/gzip"
 )
 
 func findServer(name string) (string, int) {
@@ -56,8 +58,8 @@ func main() {
 			fmt.Printf("%v", rs)
 		case "add":
 			reminder := os.Args[2]
-			day := os.Args[3]
-			_, err = client.AddReminder(context.Background(), &pb.Reminder{Text: reminder, DayOfWeek: day})
+			//day := os.Args[3]
+			_, err = client.AddReminder(context.Background(), &pb.Reminder{Text: reminder, RepeatPeriod: pb.Reminder_DAILY})
 			if err != nil {
 				log.Fatalf("Unable to add reminder: %v", err)
 			}
