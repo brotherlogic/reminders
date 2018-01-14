@@ -48,6 +48,9 @@ func (g gsGHBridge) addIssue(r *pb.Reminder) (string, error) {
 	defer conn.Close()
 
 	client := pbgh.NewGithubClient(conn)
+	if r.GetGithubComponent() == "" {
+		r.GithubComponent = "home"
+	}
 	resp, err := client.AddIssue(context.Background(), &pbgh.Issue{Service: r.GetGithubComponent(), Title: r.GetText()})
 	if err != nil {
 		return "", err
