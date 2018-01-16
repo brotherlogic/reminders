@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	pbgh "github.com/brotherlogic/githubcard/proto"
@@ -16,7 +15,6 @@ func (s *Server) refresh() {
 
 func (s *Server) processTaskList(t *pb.TaskList) {
 	for _, task := range t.Tasks.Reminders {
-		s.Log(fmt.Sprintf("Task = %v (%v)", task, task.GetCurrentState()))
 
 		//Reassign a task with an empty id
 		if task.GetGithubId() == "" {
@@ -32,7 +30,6 @@ func (s *Server) processTaskList(t *pb.TaskList) {
 				s.last = &pbgh.Issue{Service: task.GithubId}
 				s.save()
 			}
-			s.Log(fmt.Sprintf("Assigned %v with %v", task, err))
 
 			return
 		case pb.Reminder_ASSIGNED:
@@ -49,7 +46,6 @@ func (s *Server) getReminders(t time.Time) []*pb.Reminder {
 	reminders := make([]*pb.Reminder, 0)
 
 	for _, r := range s.data.List.Reminders {
-		s.Log(fmt.Sprintf("TESTING %v and %v", r, r.NextRunTime-t.Unix()))
 		if r.NextRunTime < t.Unix() {
 			adjustRunTime(r)
 			reminders = append(reminders, r)
