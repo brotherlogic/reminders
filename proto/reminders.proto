@@ -40,6 +40,8 @@ message Reminder {
   }
 
   ReminderPeriod repeatPeriod = 7;
+
+  int64 uid = 8;
 }
 
 message Empty {}

@@ -27,6 +27,7 @@ type githubBridge interface {
 //AddReminder adds a reminder into the system
 func (s *Server) AddReminder(ctx context.Context, in *pb.Reminder) (*pb.Empty, error) {
 	t := time.Now()
+	in.Uid = time.Now().UnixNano()
 	s.data.List.Reminders = append(s.data.List.Reminders, in)
 	s.save()
 	s.LogFunction("AddReminder", t)
@@ -45,6 +46,7 @@ func (s *Server) AddTaskList(ctx context.Context, in *pb.TaskList) (*pb.Empty, e
 	//Ensure all tasks in the list are unassigned
 	for _, task := range in.GetTasks().GetReminders() {
 		task.CurrentState = pb.Reminder_UNASSIGNED
+		task.Uid = time.Now().UnixNano()
 	}
 
 	s.data.Tasks = append(s.data.Tasks, in)
