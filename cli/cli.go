@@ -55,7 +55,15 @@ func main() {
 			if err != nil {
 				log.Fatalf("Error adding task list %v", err)
 			}
-			fmt.Printf("%v", rs)
+			for i, reminder := range rs.List.Reminders {
+				fmt.Printf("%v. %v\n", i, reminder)
+			}
+			for i, task := range rs.Tasks {
+				fmt.Printf("%v. %v\n", i, task.Name)
+				for j, item := range task.Tasks.Reminders {
+					fmt.Printf("%v.%v. %v\n", i, j, item)
+				}
+			}
 		case "add":
 			reminder := os.Args[2]
 			//day := os.Args[3]

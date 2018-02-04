@@ -104,6 +104,30 @@ func (s *Server) loadReminders() error {
 	}
 
 	s.data = data.(*pb.ReminderConfig)
+
+	found := false
+	for _, reminder := range s.data.GetList().GetReminders() {
+		if reminder.GetUid() == 0 {
+			reminder.Uid = time.Now().UnixNano()
+			time.Sleep(time.Millisecond)
+			found = true
+		}
+	}
+
+	for _, tasklist := range s.data.GetTasks() {
+		for _, reminder := range tasklist.GetTasks().GetReminders() {
+			if reminder.GetUid() == 0 {
+				reminder.Uid = time.Now().UnixNano()
+				time.Sleep(time.Millisecond)
+				found = true
+			}
+		}
+	}
+
+	if found {
+		s.save()
+	}
+
 	return nil
 }
 
