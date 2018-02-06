@@ -56,3 +56,26 @@ func (s *Server) AddTaskList(ctx context.Context, in *pb.TaskList) (*pb.Empty, e
 	s.LogFunction("AddTaskList", t)
 	return &pb.Empty{}, nil
 }
+
+//DeleteTask deletes a task
+func (s *Server) DeleteTask(ctx context.Context, in *pb.DeleteRequest) (*pb.DeleteResponse, error) {
+	t := time.Now()
+
+	for i, reminder := range s.data.GetList().GetReminders() {
+		if reminder.GetUid() == in.GetUid() {
+			s.data.GetList().Reminders = append(s.data.GetList().Reminders[:i], s.data.GetList().Reminders[i+1:]...)
+		}
+	}
+
+	for _, tasklist := range s.data.GetTasks() {
+		for i, reminder := range tasklist.GetTasks().GetReminders() {
+			if reminder.GetUid() == in.GetUid() {
+				tasklist.GetTasks().Reminders = append(tasklist.GetTasks().Reminders[:i], tasklist.GetTasks().Reminders[i+1:]...)
+			}
+		}
+	}
+
+	s.save()
+	s.LogFunction("Delete", t)
+	return &pb.DeleteResponse{}, nil
+}

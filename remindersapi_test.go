@@ -208,3 +208,61 @@ func TestBuildReminders(t *testing.T) {
 	}
 
 }
+
+func TestDeleteDaily(t *testing.T) {
+	s := InitTestServer(".testmonthlyreminder")
+
+	_, err := s.AddReminder(context.Background(), &pb.Reminder{Text: "Hello", NextRunTime: time.Now().Unix(), RepeatPeriod: pb.Reminder_DAILY})
+	if err != nil {
+		t.Fatalf("Error adding reminder: %v", err)
+	}
+
+	rems, err := s.ListReminders(context.Background(), &pb.Empty{})
+	if err != nil {
+		t.Fatalf("Error listing: %v", err)
+	}
+
+	if len(rems.GetList().GetReminders()) != 1 {
+		t.Fatalf("Whaaaa: %v", rems)
+	}
+
+	s.DeleteTask(context.Background(), &pb.DeleteRequest{Uid: rems.GetList().GetReminders()[0].Uid})
+
+	rems, err = s.ListReminders(context.Background(), &pb.Empty{})
+	if err != nil {
+		t.Fatalf("Error listing: %v", err)
+	}
+
+	if len(rems.GetList().GetReminders()) != 0 {
+		t.Fatalf("Whaaaa: %v", rems)
+	}
+}
+
+func TestDeleteTask(t *testing.T) {
+	s := InitTestServer(".testmonthlyreminder")
+
+	_, err := s.AddTaskList(context.Background(), &pb.TaskList{Name: "Testing", Tasks: &pb.ReminderList{Reminders: []*pb.Reminder{&pb.Reminder{Text: "This is Task One"}}}})
+	if err != nil {
+		t.Fatalf("Error adding reminder: %v", err)
+	}
+
+	rems, err := s.ListReminders(context.Background(), &pb.Empty{})
+	if err != nil {
+		t.Fatalf("Error listing: %v", err)
+	}
+
+	if len(rems.GetTasks()[0].GetTasks().GetReminders()) != 1 {
+		t.Fatalf("Whaaaa: %v", rems)
+	}
+
+	s.DeleteTask(context.Background(), &pb.DeleteRequest{Uid: rems.GetTasks()[0].GetTasks().GetReminders()[0].Uid})
+
+	rems, err = s.ListReminders(context.Background(), &pb.Empty{})
+	if err != nil {
+		t.Fatalf("Error listing: %v", err)
+	}
+
+	if len(rems.GetTasks()[0].GetTasks().GetReminders()) != 0 {
+		t.Fatalf("Whaaaa: %v", rems)
+	}
+}
