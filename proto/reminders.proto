@@ -55,8 +55,17 @@ message TaskList {
   ReminderList tasks = 2;
 }
 
+message DeleteRequest {
+  int64 uid = 1;
+}
+
+message DeleteResponse {
+  
+}
+
 service Reminders {
 	rpc AddReminder(Reminder) returns (Empty) {};
   rpc ListReminders(Empty) returns (ReminderConfig) {};
   rpc AddTaskList(TaskList) returns (Empty) {};
+  rpc DeleteTask(DeleteRequest) returns (DeleteResponse) {};
 }
