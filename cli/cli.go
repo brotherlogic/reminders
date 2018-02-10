@@ -8,37 +8,19 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/brotherlogic/goserver/utils"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	pbdi "github.com/brotherlogic/discovery/proto"
+	"github.com/brotherlogic/goserver/utils"
 	pb "github.com/brotherlogic/reminders/proto"
 
 	_ "google.golang.org/grpc/encoding/gzip"
 )
 
-func findServer(name string) (string, int) {
-	conn, err := grpc.Dial(utils.RegistryIP+":"+strconv.Itoa(utils.RegistryPort), grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("Cannot reach discover server: %v (trying to discover %v)", err, name)
-	}
-	defer conn.Close()
-
-	registry := pbdi.NewDiscoveryServiceClient(conn)
-	r, err := registry.Discover(context.Background(), &pbdi.RegistryEntry{Name: name})
-
-	if err != nil {
-		log.Fatalf("Failure to list: %v", err)
-		return "", -1
-	}
-	return r.Ip, int(r.Port)
-}
-
 func main() {
 
-	host, port := findServer("reminders")
-	conn, err := grpc.Dial(host+":"+strconv.Itoa(port), grpc.WithInsecure())
+	host, port, _ := utils.Resolve("reminders")
+	conn, err := grpc.Dial(host+":"+strconv.Itoa(int(port)), grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Unable to dial: %v", err)
 	}
@@ -88,6 +70,15 @@ func main() {
 			_, err = client.AddTaskList(context.Background(), &pb.TaskList{Name: os.Args[2], Tasks: list})
 			if err != nil {
 				log.Fatalf("Error adding tasks: %v", err)
+			}
+		case "delete":
+			uid, err := strconv.Atoi(os.Args[2])
+			if err != nil {
+				log.Fatalf("Unable to convert UID: %v", err)
+			}
+			_, err = client.DeleteTask(context.Background(), &pb.DeleteRequest{Uid: int64(uid)})
+			if err != nil {
+				log.Fatalf("Delete failed: %v", err)
 			}
 		}
 	}
