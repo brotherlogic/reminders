@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"io/ioutil"
 	"log"
@@ -9,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"google.golang.org/grpc"
-
 	"github.com/brotherlogic/goserver"
 	"github.com/brotherlogic/keystore/client"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
 
 	pbgh "github.com/brotherlogic/githubcard/proto"
 	pbg "github.com/brotherlogic/goserver/proto"
@@ -28,7 +27,7 @@ type gsGHBridge struct {
 	getter func(servername string) (string, int)
 }
 
-func (s *Server) processLoop() {
+func (s *Server) processLoop(ctx context.Context) {
 	s.lastBasicRun = time.Now()
 	s.refresh()
 	rs := s.getReminders(time.Now())
