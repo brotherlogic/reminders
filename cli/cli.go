@@ -18,7 +18,6 @@ import (
 )
 
 func main() {
-
 	host, port, _ := utils.Resolve("reminders")
 	conn, err := grpc.Dial(host+":"+strconv.Itoa(int(port)), grpc.WithInsecure())
 	if err != nil {
