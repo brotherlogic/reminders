@@ -137,6 +137,9 @@ func (s *Server) DoRegister(server *grpc.Server) {
 
 // Mote promotes/demotes this server
 func (s *Server) Mote(master bool) error {
+	if master {
+		return s.loadReminders()
+	}
 	return nil
 }
 
@@ -161,11 +164,6 @@ func main() {
 	}
 
 	server := InitServer()
-	err := server.loadReminders()
-	if err != nil {
-		//Quiet fail on crash on load
-		return
-	}
 	server.Register = server
 	server.RegisterServer("reminders", false)
 
