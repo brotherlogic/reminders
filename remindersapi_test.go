@@ -198,7 +198,7 @@ func TestBuildReminders(t *testing.T) {
 	t2 := t1.Add(time.Hour * 24)
 	rs = s.getReminders(t2)
 	if len(rs) != 0 {
-		t.Fatalf("Wrong number of reminders on second call: %v", rs)
+		t.Fatalf("Wrong number of reminders on second call: %v with %v", rs, t2)
 	}
 
 	t3 := t2.Add(time.Hour * 24 * 7)
