@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"strconv"
@@ -138,7 +139,14 @@ func (s *Server) DoRegister(server *grpc.Server) {
 // Mote promotes/demotes this server
 func (s *Server) Mote(master bool) error {
 	if master {
-		return s.loadReminders()
+		err := s.loadReminders()
+		if err != nil {
+			return err
+		}
+		if len(s.data.List.Reminders) == 0 {
+			s.Log(fmt.Sprintf("No reminders loaded: %v", s.data))
+			return fmt.Errorf("Unable to load reminders")
+		}
 	}
 	return nil
 }
