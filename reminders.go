@@ -143,7 +143,7 @@ func (s *Server) Mote(master bool) error {
 		if err != nil {
 			return err
 		}
-		if s.data.List != nil && s.date.List.Remidners != nil && len(s.data.List.Reminders) == 0 {
+		if s.data.List != nil && s.data.List.Remidners != nil && len(s.data.List.Reminders) == 0 {
 			s.Log(fmt.Sprintf("No reminders loaded: %v", s.data))
 			return fmt.Errorf("Unable to load reminders")
 		}
