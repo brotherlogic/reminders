@@ -45,10 +45,12 @@ func (s *Server) processTaskList(t *pb.TaskList) {
 func (s *Server) getReminders(t time.Time) []*pb.Reminder {
 	reminders := make([]*pb.Reminder, 0)
 
-	for _, r := range s.data.List.Reminders {
-		if r.NextRunTime < t.Unix() {
-			adjustRunTime(r)
-			reminders = append(reminders, r)
+	if s.data.List != nil && s.data.List.Reminders != nil {
+		for _, r := range s.data.List.Reminders {
+			if r.NextRunTime < t.Unix() {
+				adjustRunTime(r)
+				reminders = append(reminders, r)
+			}
 		}
 	}
 
