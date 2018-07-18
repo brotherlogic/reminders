@@ -28,6 +28,12 @@ type githubBridge interface {
 func (s *Server) AddReminder(ctx context.Context, in *pb.Reminder) (*pb.Empty, error) {
 	t := time.Now()
 	in.Uid = time.Now().UnixNano()
+	if s.data.List == nil {
+		s.data.List = &pb.ReminderList{}
+	}
+	if s.data.List.Reminders == nil {
+		s.data.List.Reminders = []*pb.Reminder{}
+	}
 	s.data.List.Reminders = append(s.data.List.Reminders, in)
 	s.save()
 	s.LogFunction("AddReminder", t)
