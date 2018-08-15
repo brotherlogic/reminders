@@ -30,13 +30,13 @@ type gsGHBridge struct {
 
 func (s *Server) processLoop(ctx context.Context) {
 	s.lastBasicRun = time.Now()
-	s.refresh()
+	s.refresh(ctx)
 	rs := s.getReminders(time.Now())
 	s.Log("Got reminders (" + strconv.Itoa(len(rs)) + ")")
 	for _, r := range rs {
 		s.ghbridge.addIssue(r)
 	}
-	s.save()
+	s.save(ctx)
 }
 
 func (g gsGHBridge) addIssue(r *pb.Reminder) (string, error) {
@@ -82,8 +82,8 @@ func (g gsGHBridge) isComplete(r *pb.Reminder) bool {
 	return resp.GetState() == pbgh.Issue_CLOSED
 }
 
-func (s *Server) save() {
-	s.KSclient.Save(KEY, s.data)
+func (s *Server) save(ctx context.Context) {
+	s.KSclient.Save(ctx, KEY, s.data)
 }
 
 // InitServer builds an initial server
@@ -95,9 +95,9 @@ func InitServer() *Server {
 	return server
 }
 
-func (s *Server) loadReminders() error {
+func (s *Server) loadReminders(ctx context.Context) error {
 	config := &pb.ReminderConfig{}
-	data, _, err := s.KSclient.Read(KEY, config)
+	data, _, err := s.KSclient.Read(ctx, KEY, config)
 
 	if err != nil {
 		return err
@@ -125,7 +125,7 @@ func (s *Server) loadReminders() error {
 	}
 
 	if found {
-		s.save()
+		s.save(ctx)
 	}
 
 	return nil
@@ -137,9 +137,9 @@ func (s *Server) DoRegister(server *grpc.Server) {
 }
 
 // Mote promotes/demotes this server
-func (s *Server) Mote(master bool) error {
+func (s *Server) Mote(ctx context.Context, master bool) error {
 	if master {
-		err := s.loadReminders()
+		err := s.loadReminders(ctx)
 		if err != nil {
 			return err
 		}

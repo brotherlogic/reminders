@@ -3,17 +3,19 @@ package main
 import (
 	"time"
 
+	"golang.org/x/net/context"
+
 	pbgh "github.com/brotherlogic/githubcard/proto"
 	pb "github.com/brotherlogic/reminders/proto"
 )
 
-func (s *Server) refresh() {
+func (s *Server) refresh(ctx context.Context) {
 	for _, tl := range s.data.GetTasks() {
-		s.processTaskList(tl)
+		s.processTaskList(ctx, tl)
 	}
 }
 
-func (s *Server) processTaskList(t *pb.TaskList) {
+func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) {
 	for _, task := range t.Tasks.Reminders {
 
 		//Reassign a task with an empty id
@@ -28,7 +30,7 @@ func (s *Server) processTaskList(t *pb.TaskList) {
 			if err == nil {
 				task.GithubId = t
 				s.last = &pbgh.Issue{Service: task.GithubId}
-				s.save()
+				s.save(ctx)
 			}
 
 			return

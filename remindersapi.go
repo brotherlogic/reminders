@@ -35,7 +35,7 @@ func (s *Server) AddReminder(ctx context.Context, in *pb.Reminder) (*pb.Empty, e
 		s.data.List.Reminders = []*pb.Reminder{}
 	}
 	s.data.List.Reminders = append(s.data.List.Reminders, in)
-	s.save()
+	s.save(ctx)
 	s.LogFunction("AddReminder", t)
 	return &pb.Empty{}, nil
 }
@@ -56,8 +56,8 @@ func (s *Server) AddTaskList(ctx context.Context, in *pb.TaskList) (*pb.Empty, e
 	}
 
 	s.data.Tasks = append(s.data.Tasks, in)
-	s.save()
-	go s.processTaskList(in)
+	s.save(ctx)
+	go s.processTaskList(ctx, in)
 
 	s.LogFunction("AddTaskList", t)
 	return &pb.Empty{}, nil
@@ -81,7 +81,7 @@ func (s *Server) DeleteTask(ctx context.Context, in *pb.DeleteRequest) (*pb.Dele
 		}
 	}
 
-	s.save()
+	s.save(ctx)
 	s.LogFunction("Delete", t)
 	return &pb.DeleteResponse{}, nil
 }
