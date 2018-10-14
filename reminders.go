@@ -34,12 +34,12 @@ func (s *Server) processLoop(ctx context.Context) {
 	rs := s.getReminders(time.Now())
 	s.Log("Got reminders (" + strconv.Itoa(len(rs)) + ")")
 	for _, r := range rs {
-		s.ghbridge.addIssue(r)
+		s.ghbridge.addIssue(ctx, r)
 	}
 	s.save(ctx)
 }
 
-func (g gsGHBridge) addIssue(r *pb.Reminder) (string, error) {
+func (g gsGHBridge) addIssue(ctx context.Context, r *pb.Reminder) (string, error) {
 	ip, port := g.getter("githubcard")
 	conn, err := grpc.Dial(ip+":"+strconv.Itoa(port), grpc.WithInsecure())
 	if err != nil {
@@ -51,7 +51,7 @@ func (g gsGHBridge) addIssue(r *pb.Reminder) (string, error) {
 	if r.GetGithubComponent() == "" {
 		r.GithubComponent = "home"
 	}
-	resp, err := client.AddIssue(context.Background(), &pbgh.Issue{Service: r.GetGithubComponent(), Title: r.GetText()})
+	resp, err := client.AddIssue(ctx, &pbgh.Issue{Service: r.GetGithubComponent(), Title: r.GetText()})
 	if err != nil {
 		return "", err
 	}
@@ -59,7 +59,7 @@ func (g gsGHBridge) addIssue(r *pb.Reminder) (string, error) {
 	return resp.GetService() + "/" + strconv.Itoa(int(resp.GetNumber())), nil
 }
 
-func (g gsGHBridge) isComplete(r *pb.Reminder) bool {
+func (g gsGHBridge) isComplete(ctx context.Context, r *pb.Reminder) bool {
 	ip, port := g.getter("githubcard")
 	conn, err := grpc.Dial(ip+":"+strconv.Itoa(port), grpc.WithInsecure())
 	if err != nil {
@@ -74,7 +74,7 @@ func (g gsGHBridge) isComplete(r *pb.Reminder) bool {
 		//Can't process this, so just return true
 		return true
 	}
-	resp, err := client.Get(context.Background(), &pbgh.Issue{Number: int32(num), Service: elems[0]})
+	resp, err := client.Get(ctx, &pbgh.Issue{Number: int32(num), Service: elems[0]})
 	if err != nil {
 		return false
 	}

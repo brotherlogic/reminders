@@ -26,7 +26,7 @@ func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) {
 		switch task.GetCurrentState() {
 		case pb.Reminder_UNASSIGNED:
 			task.CurrentState = pb.Reminder_ASSIGNED
-			t, err := s.ghbridge.addIssue(task)
+			t, err := s.ghbridge.addIssue(ctx, task)
 			if err == nil {
 				task.GithubId = t
 				s.last = &pbgh.Issue{Service: task.GithubId}
@@ -35,7 +35,7 @@ func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) {
 
 			return
 		case pb.Reminder_ASSIGNED:
-			if s.ghbridge.isComplete(task) {
+			if s.ghbridge.isComplete(ctx, task) {
 				task.CurrentState = pb.Reminder_COMPLETE
 			} else {
 				return
