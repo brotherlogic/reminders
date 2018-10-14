@@ -20,23 +20,15 @@ type Server struct {
 }
 
 type githubBridge interface {
-	isComplete(t *pb.Reminder) bool
-	addIssue(t *pb.Reminder) (string, error)
+	isComplete(ctx context.Context, t *pb.Reminder) bool
+	addIssue(ctx context.Context, t *pb.Reminder) (string, error)
 }
 
 //AddReminder adds a reminder into the system
 func (s *Server) AddReminder(ctx context.Context, in *pb.Reminder) (*pb.Empty, error) {
-	t := time.Now()
 	in.Uid = time.Now().UnixNano()
-	if s.data.List == nil {
-		s.data.List = &pb.ReminderList{}
-	}
-	if s.data.List.Reminders == nil {
-		s.data.List.Reminders = []*pb.Reminder{}
-	}
 	s.data.List.Reminders = append(s.data.List.Reminders, in)
 	s.save(ctx)
-	s.LogFunction("AddReminder", t)
 	return &pb.Empty{}, nil
 }
 
@@ -47,8 +39,6 @@ func (s *Server) ListReminders(ctx context.Context, in *pb.Empty) (*pb.ReminderC
 
 //AddTaskList adds a task list into the system
 func (s *Server) AddTaskList(ctx context.Context, in *pb.TaskList) (*pb.Empty, error) {
-	t := time.Now()
-
 	//Ensure all tasks in the list are unassigned
 	for _, task := range in.GetTasks().GetReminders() {
 		task.CurrentState = pb.Reminder_UNASSIGNED
@@ -59,14 +49,11 @@ func (s *Server) AddTaskList(ctx context.Context, in *pb.TaskList) (*pb.Empty, e
 	s.save(ctx)
 	go s.processTaskList(ctx, in)
 
-	s.LogFunction("AddTaskList", t)
 	return &pb.Empty{}, nil
 }
 
 //DeleteTask deletes a task
 func (s *Server) DeleteTask(ctx context.Context, in *pb.DeleteRequest) (*pb.DeleteResponse, error) {
-	t := time.Now()
-
 	for i, reminder := range s.data.GetList().GetReminders() {
 		if reminder.GetUid() == in.GetUid() {
 			s.data.GetList().Reminders = append(s.data.GetList().Reminders[:i], s.data.GetList().Reminders[i+1:]...)
@@ -82,6 +69,5 @@ func (s *Server) DeleteTask(ctx context.Context, in *pb.DeleteRequest) (*pb.Dele
 	}
 
 	s.save(ctx)
-	s.LogFunction("Delete", t)
 	return &pb.DeleteResponse{}, nil
 }

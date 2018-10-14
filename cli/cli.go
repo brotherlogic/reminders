@@ -7,23 +7,29 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
+	pbgs "github.com/brotherlogic/goserver/proto"
 	"github.com/brotherlogic/goserver/utils"
 	pb "github.com/brotherlogic/reminders/proto"
+	pbt "github.com/brotherlogic/tracer/proto"
 
 	_ "google.golang.org/grpc/encoding/gzip"
 )
 
 func main() {
+
 	host, port, _ := utils.Resolve("reminders")
 	conn, err := grpc.Dial(host+":"+strconv.Itoa(int(port)), grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Unable to dial: %v", err)
 	}
 	defer conn.Close()
+
+	ctx, cancel := utils.BuildContext("reminders_cli_"+os.Args[1], "reminders", pbgs.ContextType_MEDIUM)
+	defer cancel()
 
 	client := pb.NewRemindersClient(conn)
 
@@ -32,7 +38,7 @@ func main() {
 	} else {
 		switch os.Args[1] {
 		case "list":
-			rs, err := client.ListReminders(context.Background(), &pb.Empty{})
+			rs, err := client.ListReminders(ctx, &pb.Empty{})
 			if err != nil {
 				log.Fatalf("Error adding task list %v", err)
 			}
@@ -48,7 +54,7 @@ func main() {
 		case "add":
 			reminder := os.Args[2]
 			//day := os.Args[3]
-			_, err = client.AddReminder(context.Background(), &pb.Reminder{Text: reminder, RepeatPeriod: pb.Reminder_HALF_YEARLY})
+			_, err = client.AddReminder(ctx, &pb.Reminder{Text: reminder, RepeatPeriod: pb.Reminder_HALF_YEARLY})
 			if err != nil {
 				log.Fatalf("Unable to add reminder: %v", err)
 			}
@@ -66,7 +72,7 @@ func main() {
 				list.Reminders = append(list.Reminders, &pb.Reminder{Text: elems[0], GithubComponent: elems[1]})
 			}
 
-			_, err = client.AddTaskList(context.Background(), &pb.TaskList{Name: os.Args[2], Tasks: list})
+			_, err = client.AddTaskList(ctx, &pb.TaskList{Name: os.Args[2], Tasks: list})
 			if err != nil {
 				log.Fatalf("Error adding tasks: %v", err)
 			}
@@ -75,10 +81,11 @@ func main() {
 			if err != nil {
 				log.Fatalf("Unable to convert UID: %v", err)
 			}
-			_, err = client.DeleteTask(context.Background(), &pb.DeleteRequest{Uid: int64(uid)})
+			_, err = client.DeleteTask(ctx, &pb.DeleteRequest{Uid: int64(uid)})
 			if err != nil {
 				log.Fatalf("Delete failed: %v", err)
 			}
 		}
 	}
+	utils.SendTrace(ctx, "reminders_cli_"+os.Args[1], time.Now(), pbt.Milestone_END, "reminders")
 }

@@ -1,13 +1,13 @@
 package main
 
 import (
-	"context"
 	"log"
 	"testing"
 	"time"
 
 	"github.com/brotherlogic/goserver"
 	"github.com/brotherlogic/keystore/client"
+	"golang.org/x/net/context"
 
 	pb "github.com/brotherlogic/reminders/proto"
 )
@@ -17,14 +17,14 @@ type testGHBridge struct {
 	issues    map[string]string
 }
 
-func (githubBridge testGHBridge) isComplete(t *pb.Reminder) bool {
+func (githubBridge testGHBridge) isComplete(ctx context.Context, t *pb.Reminder) bool {
 	if val, ok := githubBridge.completes[t.GetText()]; ok {
 		return val
 	}
 	return false
 }
 
-func (githubBridge testGHBridge) addIssue(t *pb.Reminder) (string, error) {
+func (githubBridge testGHBridge) addIssue(ctx context.Context, t *pb.Reminder) (string, error) {
 	if val, ok := githubBridge.issues[t.GetText()]; ok {
 		return val, nil
 	}
@@ -60,9 +60,9 @@ func TestAddTaskList(t *testing.T) {
 		t.Errorf("Reminders were not created: %v", s.last)
 	}
 
-	s.refresh()
+	s.refresh(context.Background())
 	s.ghbridge.(testGHBridge).completes["This is Task One"] = true
-	s.refresh()
+	s.refresh(context.Background())
 
 	if s.last.Service != "issue2" {
 		t.Errorf("Reminders were not refreshed: %v", s.last)
