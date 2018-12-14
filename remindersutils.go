@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"golang.org/x/net/context"
@@ -26,11 +27,15 @@ func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) {
 		switch task.GetCurrentState() {
 		case pb.Reminder_UNASSIGNED:
 			task.CurrentState = pb.Reminder_ASSIGNED
+			s.pushCount++
 			t, err := s.ghbridge.addIssue(ctx, task)
 			if err == nil {
 				task.GithubId = t
 				s.last = &pbgh.Issue{Service: task.GithubId}
 				s.save(ctx)
+			} else {
+				s.pushFail++
+				s.pushFailure = fmt.Sprintf("%v", err)
 			}
 
 			return

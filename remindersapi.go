@@ -3,21 +3,10 @@ package main
 import (
 	"time"
 
-	"github.com/brotherlogic/goserver"
 	"golang.org/x/net/context"
 
-	pbd "github.com/brotherlogic/githubcard/proto"
 	pb "github.com/brotherlogic/reminders/proto"
 )
-
-//Server is the main server
-type Server struct {
-	*goserver.GoServer
-	data         *pb.ReminderConfig
-	ghbridge     githubBridge
-	last         *pbd.Issue
-	lastBasicRun time.Time
-}
 
 type githubBridge interface {
 	isComplete(ctx context.Context, t *pb.Reminder) bool
