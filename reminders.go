@@ -19,6 +19,18 @@ import (
 	pb "github.com/brotherlogic/reminders/proto"
 )
 
+//Server is the main server
+type Server struct {
+	*goserver.GoServer
+	data         *pb.ReminderConfig
+	ghbridge     githubBridge
+	last         *pbgh.Issue
+	lastBasicRun time.Time
+	pushCount    int64
+	pushFail     int64
+	pushFailure  string
+}
+
 const (
 	//KEY under which we store the config data
 	KEY = "/github.com/brotherlogic/reminders/config"
@@ -158,7 +170,12 @@ func (s *Server) ReportHealth() bool {
 
 // GetState gets the state of the server
 func (s *Server) GetState() []*pbg.State {
-	return []*pbg.State{&pbg.State{Key: "last_update_time", TimeValue: s.lastBasicRun.Unix()}}
+	return []*pbg.State{
+		&pbg.State{Key: "last_update_time", TimeValue: s.lastBasicRun.Unix()},
+		&pbg.State{Key: "push_count", Value: s.pushCount},
+		&pbg.State{Key: "push_fail", Value: s.pushFail},
+		&pbg.State{Key: "push_fail_reason", Text: s.pushFailure},
+	}
 }
 
 func main() {

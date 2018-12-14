@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"testing"
 	"time"
@@ -15,6 +16,7 @@ import (
 type testGHBridge struct {
 	completes map[string]bool
 	issues    map[string]string
+	fail      bool
 }
 
 func (githubBridge testGHBridge) isComplete(ctx context.Context, t *pb.Reminder) bool {
@@ -25,6 +27,10 @@ func (githubBridge testGHBridge) isComplete(ctx context.Context, t *pb.Reminder)
 }
 
 func (githubBridge testGHBridge) addIssue(ctx context.Context, t *pb.Reminder) (string, error) {
+	log.Printf("ADDING: %v", githubBridge.fail)
+	if githubBridge.fail {
+		return "blah", fmt.Errorf("Failed to add issue")
+	}
 	if val, ok := githubBridge.issues[t.GetText()]; ok {
 		return val, nil
 	}
@@ -39,6 +45,20 @@ func InitTestServer(foldername string) *Server {
 	server.GoServer.KSclient = *keystoreclient.GetTestClient(foldername)
 
 	return server
+}
+
+func TestAddTaskListWithFail(t *testing.T) {
+	s := InitTestServer(".testaddtasklist")
+	s.ghbridge = testGHBridge{fail: true}
+	_, err := s.AddTaskList(context.Background(), &pb.TaskList{Name: "Testing", Tasks: &pb.ReminderList{Reminders: []*pb.Reminder{&pb.Reminder{Text: "This is Task One"}, &pb.Reminder{Text: "This is Task Two"}}}})
+	s.refresh(context.Background())
+	if err != nil {
+		t.Fatalf("Error adding task list: %v", err)
+	}
+
+	if s.pushFail != 1 {
+		t.Errorf("Fail did not increment fail count")
+	}
 }
 
 func TestAddTaskList(t *testing.T) {
