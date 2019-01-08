@@ -68,20 +68,24 @@ func adjustRunTime(r *pb.Reminder) {
 	t := time.Now()
 	ct := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 
-	switch r.RepeatPeriod {
-	case pb.Reminder_DAILY:
-		ct = ct.AddDate(0, 0, 1)
-	case pb.Reminder_WEEKLY:
-		for (r.DayOfWeek != "" && ct.Weekday().String() != r.DayOfWeek) || ct.Before(t) {
+	if r.RepeatPeriodInSeconds > 0 {
+		r.NextRunTime += r.RepeatPeriodInSeconds
+	} else {
+		switch r.RepeatPeriod {
+		case pb.Reminder_DAILY:
 			ct = ct.AddDate(0, 0, 1)
+		case pb.Reminder_WEEKLY:
+			for (r.DayOfWeek != "" && ct.Weekday().String() != r.DayOfWeek) || ct.Before(t) {
+				ct = ct.AddDate(0, 0, 1)
+			}
+		case pb.Reminder_MONTHLY:
+			ct = ct.AddDate(0, 1, 0)
+		case pb.Reminder_YEARLY:
+			ct = ct.AddDate(1, 0, 0)
+		case pb.Reminder_HALF_YEARLY:
+			ct = ct.AddDate(0, 6, 0)
 		}
-	case pb.Reminder_MONTHLY:
-		ct = ct.AddDate(0, 1, 0)
-	case pb.Reminder_YEARLY:
-		ct = ct.AddDate(1, 0, 0)
-	case pb.Reminder_HALF_YEARLY:
-		ct = ct.AddDate(0, 6, 0)
-	}
 
-	r.NextRunTime = ct.Unix()
+		r.NextRunTime = ct.Unix()
+	}
 }

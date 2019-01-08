@@ -42,6 +42,9 @@ message Reminder {
   ReminderPeriod repeatPeriod = 7;
 
   int64 uid = 8;
+
+  // For something more freeform
+  int64 repeat_period_in_seconds = 9;
 }
 
 message Empty {}
