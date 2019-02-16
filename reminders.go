@@ -148,6 +148,12 @@ func (s *Server) DoRegister(server *grpc.Server) {
 	pb.RegisterRemindersServer(server, s)
 }
 
+// Shutdown the server
+func (s *Server) Shutdown(ctx context.Context) error {
+	s.save(ctx)
+	return nil
+}
+
 // Mote promotes/demotes this server
 func (s *Server) Mote(ctx context.Context, master bool) error {
 	if master {
