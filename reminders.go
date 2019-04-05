@@ -40,7 +40,7 @@ type gsGHBridge struct {
 	getter func(servername string) (string, int)
 }
 
-func (s *Server) processLoop(ctx context.Context) {
+func (s *Server) processLoop(ctx context.Context) error {
 	s.lastBasicRun = time.Now()
 	s.refresh(ctx)
 	rs := s.getReminders(time.Now())
@@ -49,6 +49,7 @@ func (s *Server) processLoop(ctx context.Context) {
 		s.ghbridge.addIssue(ctx, r)
 	}
 	s.save(ctx)
+	return nil
 }
 
 func (g gsGHBridge) addIssue(ctx context.Context, r *pb.Reminder) (string, error) {

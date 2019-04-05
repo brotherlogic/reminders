@@ -7,14 +7,11 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"google.golang.org/grpc"
 
-	pbgs "github.com/brotherlogic/goserver/proto"
 	"github.com/brotherlogic/goserver/utils"
 	pb "github.com/brotherlogic/reminders/proto"
-	pbt "github.com/brotherlogic/tracer/proto"
 
 	_ "google.golang.org/grpc/encoding/gzip"
 )
@@ -28,7 +25,7 @@ func main() {
 	}
 	defer conn.Close()
 
-	ctx, cancel := utils.BuildContext("reminders_cli_"+os.Args[1], "reminders", pbgs.ContextType_MEDIUM)
+	ctx, cancel := utils.BuildContext("reminders_cli_"+os.Args[1], "reminders")
 	defer cancel()
 
 	client := pb.NewRemindersClient(conn)
@@ -87,5 +84,4 @@ func main() {
 			}
 		}
 	}
-	utils.SendTrace(ctx, "reminders_cli_"+os.Args[1], time.Now(), pbt.Milestone_END, "reminders")
 }
