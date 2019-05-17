@@ -130,6 +130,37 @@ func TestDailyReminder(t *testing.T) {
 	}
 }
 
+func TestBiweeklyReminder(t *testing.T) {
+	s := InitTestServer(".testbiweklyreminder")
+
+	ti := time.Now()
+	_, w := ti.ISOWeek()
+	if w%2 == 0 {
+		ti = ti.AddDate(0, 0, -7)
+	}
+
+	log.Printf("START %v - %v", ti, w)
+
+	_, err := s.AddReminder(context.Background(), &pb.Reminder{Text: "Hello", NextRunTime: ti.Unix(), RepeatPeriod: pb.Reminder_BIWEEKLY, DayOfWeek: "Thursday"})
+	if err != nil {
+		t.Fatalf("Error adding reminder: %v", err)
+	}
+
+	t1 := time.Now().Add(time.Second)
+	rs := s.getReminders(t1)
+	if len(rs) != 1 {
+		t.Fatalf("Wrong number of reminders")
+	}
+
+	t2 := rs[0].NextRunTime
+	dt1 := time.Unix(ti.Unix(), 0)
+	dt2 := time.Unix(t2, 0)
+
+	if dt2.Sub(dt1) < time.Hour*24*7 || dt2.Weekday() != time.Thursday {
+		t.Errorf("Run time %v should be the second week after %v -> %v", dt2.Weekday(), time.Hour*24*7, dt2.Sub(dt1))
+	}
+}
+
 func TestMonthlyReminder(t *testing.T) {
 	s := InitTestServer(".testmonthlyreminder")
 

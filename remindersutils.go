@@ -67,6 +67,7 @@ func (s *Server) getReminders(t time.Time) []*pb.Reminder {
 func adjustRunTime(r *pb.Reminder) {
 	t := time.Now()
 	ct := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+	_, week := ct.ISOWeek()
 
 	if r.RepeatPeriodInSeconds > 0 {
 		r.NextRunTime += r.RepeatPeriodInSeconds
@@ -78,6 +79,12 @@ func adjustRunTime(r *pb.Reminder) {
 			for (r.DayOfWeek != "" && ct.Weekday().String() != r.DayOfWeek) || ct.Before(t) {
 				ct = ct.AddDate(0, 0, 1)
 			}
+		case pb.Reminder_BIWEEKLY:
+			for (r.DayOfWeek != "" && ct.Weekday().String() != r.DayOfWeek) || week%2 == 0 || ct.Before(t) {
+				ct = ct.AddDate(0, 0, 1)
+				_, week = ct.ISOWeek()
+			}
+
 		case pb.Reminder_MONTHLY:
 			ct = ct.AddDate(0, 1, 0)
 		case pb.Reminder_YEARLY:
