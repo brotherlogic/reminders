@@ -37,6 +37,7 @@ message Reminder {
     YEARLY = 2;
     HALF_YEARLY = 3;
     DAILY = 4;
+    BIWEEKLY = 5;
   }
 
   ReminderPeriod repeatPeriod = 7;
