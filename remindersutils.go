@@ -26,10 +26,18 @@ func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) {
 
 		switch task.GetCurrentState() {
 		case pb.Reminder_UNASSIGNED:
-			task.CurrentState = pb.Reminder_ASSIGNED
-			s.pushCount++
 			t, err := s.ghbridge.addIssue(ctx, task)
 			if err == nil {
+				for _, sil := range task.Silences {
+					err2 := s.silence.addSilence(ctx, sil, fmt.Sprintf("%v", task.Uid))
+					if err2 != nil {
+						s.pushFail++
+						s.pushFailure = fmt.Sprintf("%v", err)
+						return
+					}
+				}
+				task.CurrentState = pb.Reminder_ASSIGNED
+				s.pushCount++
 				task.GithubId = t
 				s.last = &pbgh.Issue{Service: task.GithubId}
 				s.save(ctx)
@@ -41,6 +49,10 @@ func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) {
 			return
 		case pb.Reminder_ASSIGNED:
 			if s.ghbridge.isComplete(ctx, task) {
+				err := s.silence.removeSilence(ctx, fmt.Sprintf("%v", task.Uid))
+				if err != nil {
+					return
+				}
 				task.CurrentState = pb.Reminder_COMPLETE
 			} else {
 				return
@@ -80,7 +92,7 @@ func adjustRunTime(r *pb.Reminder) {
 				ct = ct.AddDate(0, 0, 1)
 			}
 		case pb.Reminder_BIWEEKLY:
-			for (r.DayOfWeek != "" && ct.Weekday().String() != r.DayOfWeek) || week%2 == 0 || ct.Before(t) {
+			for (r.DayOfWeek != "" && ct.Weekday().String() != r.DayOfWeek) || week%2 == 1 || ct.Before(t) {
 				ct = ct.AddDate(0, 0, 1)
 				_, week = ct.ISOWeek()
 			}
