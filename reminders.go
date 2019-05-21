@@ -29,12 +29,44 @@ type Server struct {
 	pushCount    int64
 	pushFail     int64
 	pushFailure  string
+	silence      silence
 }
 
 const (
 	//KEY under which we store the config data
 	KEY = "/github.com/brotherlogic/reminders/config"
 )
+
+type silence interface {
+	addSilence(ctx context.Context, silence, key string) error
+	removeSilence(ctx context.Context, key string) error
+}
+
+type prodSilence struct {
+	dial func(server string) (*grpc.ClientConn, error)
+}
+
+func (ps *prodSilence) addSilence(ctx context.Context, silence, key string) error {
+	conn, err := ps.dial("githubcard")
+	if err != nil {
+		return err
+	}
+
+	client := pbgh.NewGithubClient(conn)
+	_, err = client.Silence(ctx, &pbgh.SilenceRequest{Silence: silence, Origin: key, State: pbgh.SilenceRequest_SILENCE})
+	return err
+}
+
+func (ps *prodSilence) removeSilence(ctx context.Context, key string) error {
+	conn, err := ps.dial("githubcard")
+	if err != nil {
+		return err
+	}
+
+	client := pbgh.NewGithubClient(conn)
+	_, err = client.Silence(ctx, &pbgh.SilenceRequest{Origin: key, State: pbgh.SilenceRequest_UNSILENCE})
+	return err
+}
 
 type gsGHBridge struct {
 	getter func(servername string) (string, int)
@@ -105,6 +137,7 @@ func InitServer() *Server {
 	server.ghbridge = gsGHBridge{getter: server.GetIP}
 	server.PrepServer()
 	server.GoServer.KSclient = *keystoreclient.GetClient(server.GetIP)
+	server.silence = &prodSilence{dial: server.DialMaster}
 	return server
 }
 

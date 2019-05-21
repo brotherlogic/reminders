@@ -46,6 +46,9 @@ message Reminder {
 
   // For something more freeform
   int64 repeat_period_in_seconds = 9;
+
+  // To enable alert silencing
+  repeated string silences = 10;
 }
 
 message Empty {}

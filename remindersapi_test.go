@@ -13,6 +13,25 @@ import (
 	pb "github.com/brotherlogic/reminders/proto"
 )
 
+type testSilence struct {
+	failAdd bool
+	failRem bool
+}
+
+func (t *testSilence) addSilence(ctx context.Context, silence, key string) error {
+	if t.failAdd {
+		return fmt.Errorf("Built to fail")
+	}
+	return nil
+}
+
+func (t *testSilence) removeSilence(ctx context.Context, key string) error {
+	if t.failRem {
+		return fmt.Errorf("Built to fail")
+	}
+	return nil
+}
+
 type testGHBridge struct {
 	completes map[string]bool
 	issues    map[string]string
@@ -43,7 +62,7 @@ func InitTestServer(foldername string) *Server {
 	server.SkipLog = true
 	server.Register = server
 	server.GoServer.KSclient = *keystoreclient.GetTestClient(foldername)
-
+	server.silence = &testSilence{}
 	return server
 }
 
@@ -67,7 +86,7 @@ func TestAddTaskList(t *testing.T) {
 	s.ghbridge.(testGHBridge).issues["This is Task One"] = "issue1"
 	s.ghbridge.(testGHBridge).issues["This is Task Two"] = "issue2"
 	log.Printf("BRIDGE: %v", s.ghbridge)
-	_, err := s.AddTaskList(context.Background(), &pb.TaskList{Name: "Testing", Tasks: &pb.ReminderList{Reminders: []*pb.Reminder{&pb.Reminder{Text: "This is Task One"}, &pb.Reminder{Text: "This is Task Two"}}}})
+	_, err := s.AddTaskList(context.Background(), &pb.TaskList{Name: "Testing", Tasks: &pb.ReminderList{Reminders: []*pb.Reminder{&pb.Reminder{Text: "This is Task One", Silences: []string{"test"}}, &pb.Reminder{Text: "This is Task Two"}}}})
 	if err != nil {
 		t.Fatalf("Error adding task list: %v", err)
 	}
@@ -86,6 +105,56 @@ func TestAddTaskList(t *testing.T) {
 
 	if s.last.Service != "issue2" {
 		t.Errorf("Reminders were not refreshed: %v", s.last)
+	}
+}
+
+func TestAddTaskListWithSilenceRemoveFail(t *testing.T) {
+	s := InitTestServer(".testaddtasklist")
+	s.AddReminder(context.Background(), &pb.Reminder{Text: "This is a regular reminder", DayOfWeek: "Sunday"})
+	s.ghbridge.(testGHBridge).issues["This is Task One"] = "issue1"
+	s.ghbridge.(testGHBridge).issues["This is Task Two"] = "issue2"
+	s.silence = &testSilence{failRem: true}
+	log.Printf("BRIDGE: %v", s.ghbridge)
+	_, err := s.AddTaskList(context.Background(), &pb.TaskList{Name: "Testing", Tasks: &pb.ReminderList{Reminders: []*pb.Reminder{&pb.Reminder{Text: "This is Task One", Silences: []string{"test"}}, &pb.Reminder{Text: "This is Task Two"}}}})
+	if err != nil {
+		t.Fatalf("Error adding task list: %v", err)
+	}
+
+	// Sleep to allow stuff to process
+	time.Sleep(time.Second)
+
+	log.Printf("BRIDGE IS %v", s.ghbridge)
+	if s.last.Service != "issue1" {
+		t.Errorf("Reminders were not created: %v", s.last)
+	}
+
+	s.refresh(context.Background())
+	s.ghbridge.(testGHBridge).completes["This is Task One"] = true
+	s.refresh(context.Background())
+
+	if s.last.Service != "issue1" {
+		t.Errorf("Reminders were not refreshed: %v", s.last)
+	}
+}
+
+func TestAddTaskListWithSilenceFail(t *testing.T) {
+	s := InitTestServer(".testaddtasklist")
+	s.AddReminder(context.Background(), &pb.Reminder{Text: "This is a regular reminder", DayOfWeek: "Sunday"})
+	s.ghbridge.(testGHBridge).issues["This is Task One"] = "issue1"
+	s.ghbridge.(testGHBridge).issues["This is Task Two"] = "issue2"
+	s.silence = &testSilence{failAdd: true}
+	log.Printf("BRIDGE: %v", s.ghbridge)
+	_, err := s.AddTaskList(context.Background(), &pb.TaskList{Name: "Testing", Tasks: &pb.ReminderList{Reminders: []*pb.Reminder{&pb.Reminder{Text: "This is Task One", Silences: []string{"test"}}, &pb.Reminder{Text: "This is Task Two"}}}})
+	if err != nil {
+		t.Fatalf("Error adding task list: %v", err)
+	}
+
+	// Sleep to allow stuff to process
+	time.Sleep(time.Second)
+
+	log.Printf("BRIDGE IS %v", s.ghbridge)
+	if s.last != nil {
+		t.Errorf("Reminders were created: %v", s.last)
 	}
 }
 
@@ -138,8 +207,6 @@ func TestBiweeklyReminder(t *testing.T) {
 	if w%2 == 0 {
 		ti = ti.AddDate(0, 0, -7)
 	}
-
-	log.Printf("START %v - %v", ti, w)
 
 	_, err := s.AddReminder(context.Background(), &pb.Reminder{Text: "Hello", NextRunTime: ti.Unix(), RepeatPeriod: pb.Reminder_BIWEEKLY, DayOfWeek: "Thursday"})
 	if err != nil {
