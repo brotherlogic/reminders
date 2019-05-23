@@ -67,7 +67,7 @@ func (s *Server) getReminders(t time.Time) []*pb.Reminder {
 	if s.data.List != nil && s.data.List.Reminders != nil {
 		for _, r := range s.data.List.Reminders {
 			if r.NextRunTime < t.Unix() {
-				adjustRunTime(r)
+				s.adjustRunTime(r)
 				reminders = append(reminders, r)
 			}
 		}
@@ -76,13 +76,13 @@ func (s *Server) getReminders(t time.Time) []*pb.Reminder {
 	return reminders
 }
 
-func adjustRunTime(r *pb.Reminder) {
+func (s *Server) adjustRunTime(r *pb.Reminder) {
 	t := time.Now()
 	ct := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 	_, week := ct.ISOWeek()
 
 	if r.RepeatPeriodInSeconds > 0 {
-		r.NextRunTime += r.RepeatPeriodInSeconds
+		r.NextRunTime = t.Unix() + r.RepeatPeriodInSeconds
 	} else {
 		switch r.RepeatPeriod {
 		case pb.Reminder_DAILY:
@@ -92,7 +92,7 @@ func adjustRunTime(r *pb.Reminder) {
 				ct = ct.AddDate(0, 0, 1)
 			}
 		case pb.Reminder_BIWEEKLY:
-			for (r.DayOfWeek != "" && ct.Weekday().String() != r.DayOfWeek) || week%2 == 1 || ct.Before(t) {
+			for (r.DayOfWeek != "" && ct.Weekday().String() != r.DayOfWeek) || week%2 == 0 || ct.Before(t) {
 				ct = ct.AddDate(0, 0, 1)
 				_, week = ct.ISOWeek()
 			}

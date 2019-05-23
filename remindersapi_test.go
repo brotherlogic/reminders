@@ -300,7 +300,7 @@ func TestYearlyReminder(t *testing.T) {
 func TestBuildReminders(t *testing.T) {
 	s := InitTestServer(".testaddlist")
 
-	_, err := s.AddReminder(context.Background(), &pb.Reminder{Text: "Hello", DayOfWeek: "Friday"})
+	_, err := s.AddReminder(context.Background(), &pb.Reminder{Text: "Hello", DayOfWeek: "Monday"})
 	if err != nil {
 		t.Fatalf("Error adding reminder: %v", err)
 	}
