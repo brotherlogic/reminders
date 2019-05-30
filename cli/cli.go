@@ -64,9 +64,11 @@ func main() {
 			defer file.Close()
 
 			scanner := bufio.NewScanner(file)
+			scanner.Scan()
+			silences := strings.Split(scanner.Text(), ",")
 			for scanner.Scan() {
 				elems := strings.Split(scanner.Text(), "~")
-				list.Reminders = append(list.Reminders, &pb.Reminder{Text: elems[0], GithubComponent: elems[1]})
+				list.Reminders = append(list.Reminders, &pb.Reminder{Text: elems[0], GithubComponent: elems[1], Silences: silences})
 			}
 
 			_, err = client.AddTaskList(ctx, &pb.TaskList{Name: os.Args[2], Tasks: list})
