@@ -109,6 +109,7 @@ func (g gsGHBridge) addIssue(ctx context.Context, r *pb.Reminder) (string, error
 func (g gsGHBridge) isComplete(ctx context.Context, r *pb.Reminder) bool {
 	conn, err := g.dial("githubcard")
 	if err != nil {
+		g.log(fmt.Sprintf("DIAL FAIL: %v", err))
 		return false
 	}
 	defer conn.Close()
@@ -118,10 +119,12 @@ func (g gsGHBridge) isComplete(ctx context.Context, r *pb.Reminder) bool {
 	num, _ := strconv.Atoi(elems[1])
 	if len(elems[0]) == 0 || num == 0 {
 		//Can't process this, so just return true
+		g.log(fmt.Sprintf("UNPROCESSABLE: %v %v", elems[0], num))
 		return true
 	}
 	resp, err := client.Get(ctx, &pbgh.Issue{Number: int32(num), Service: elems[0]})
 	if err != nil {
+		g.log(fmt.Sprintf("ERRORED: %v", err))
 		return false
 	}
 
