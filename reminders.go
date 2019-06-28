@@ -70,6 +70,7 @@ func (ps *prodSilence) removeSilence(ctx context.Context, key string) error {
 
 type gsGHBridge struct {
 	getter func(servername string) (string, int)
+	dial   func(server string) (*grpc.ClientConn, error)
 }
 
 func (s *Server) processLoop(ctx context.Context) error {
@@ -105,8 +106,7 @@ func (g gsGHBridge) addIssue(ctx context.Context, r *pb.Reminder) (string, error
 }
 
 func (g gsGHBridge) isComplete(ctx context.Context, r *pb.Reminder) bool {
-	ip, port := g.getter("githubcard")
-	conn, err := grpc.Dial(ip+":"+strconv.Itoa(port), grpc.WithInsecure())
+	conn, err := g.dial("githubcard")
 	if err != nil {
 		return false
 	}
@@ -134,7 +134,7 @@ func (s *Server) save(ctx context.Context) {
 // InitServer builds an initial server
 func InitServer() *Server {
 	server := &Server{GoServer: &goserver.GoServer{}, data: &pb.ReminderConfig{List: &pb.ReminderList{Reminders: make([]*pb.Reminder, 0)}, Tasks: make([]*pb.TaskList, 0)}}
-	server.ghbridge = gsGHBridge{getter: server.GetIP}
+	server.ghbridge = gsGHBridge{getter: server.GetIP, dial: server.DialMaster}
 	server.PrepServer()
 	server.GoServer.KSclient = *keystoreclient.GetClient(server.GetIP)
 	server.silence = &prodSilence{dial: server.DialMaster}
