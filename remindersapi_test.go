@@ -132,7 +132,7 @@ func TestAddTaskListWithSilenceRemoveFail(t *testing.T) {
 	s.ghbridge.(testGHBridge).completes["This is Task One"] = true
 	s.refresh(context.Background())
 
-	if s.last.Service != "issue1" {
+	if s.last.Service == "issue1" {
 		t.Errorf("Reminders were not refreshed: %v", s.last)
 	}
 }

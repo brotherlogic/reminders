@@ -51,7 +51,7 @@ func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) {
 			if s.ghbridge.isComplete(ctx, task) {
 				err := s.silence.removeSilence(ctx, fmt.Sprintf("%v", task.Uid))
 				if err != nil {
-					return
+					s.Log(fmt.Sprintf("Unable to silence"))
 				}
 				task.CurrentState = pb.Reminder_COMPLETE
 			} else {
