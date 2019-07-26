@@ -141,7 +141,7 @@ func InitServer() *Server {
 	server := &Server{GoServer: &goserver.GoServer{}, data: &pb.ReminderConfig{List: &pb.ReminderList{Reminders: make([]*pb.Reminder, 0)}, Tasks: make([]*pb.TaskList, 0)}}
 	server.ghbridge = gsGHBridge{getter: server.GetIP, dial: server.DialMaster, log: server.Log}
 	server.PrepServer()
-	server.GoServer.KSclient = *keystoreclient.GetClient(server.GetIP)
+	server.GoServer.KSclient = *keystoreclient.GetClient(server.DialMaster)
 	server.silence = &prodSilence{dial: server.DialMaster}
 	return server
 }
