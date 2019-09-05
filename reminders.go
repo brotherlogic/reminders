@@ -76,7 +76,9 @@ type gsGHBridge struct {
 
 func (s *Server) processLoop(ctx context.Context) error {
 	s.lastBasicRun = time.Now()
+	s.Log(fmt.Sprintf("Refreshing"))
 	s.refresh(ctx)
+	s.Log(fmt.Sprintf("Getting Reminders"))
 	rs := s.getReminders(time.Now())
 	s.Log("Got reminders (" + strconv.Itoa(len(rs)) + ")")
 	for _, r := range rs {
