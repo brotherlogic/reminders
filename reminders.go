@@ -225,6 +225,13 @@ func (s *Server) GetState() []*pbg.State {
 	}
 }
 
+func (s *Server) checkLoop(ctx context.Context) error {
+	if time.Now().Sub(s.lastBasicRun) > time.Hour*12 {
+		s.RaiseIssue(ctx, "Reminders Error", fmt.Sprintf("Reminders haven't been processed since %v", s.lastBasicRun), false)
+	}
+	return nil
+}
+
 func main() {
 	var quiet = flag.Bool("quiet", true, "Show all output")
 	flag.Parse()
@@ -241,6 +248,7 @@ func main() {
 
 	//Update the tasks every 24 hours
 	server.RegisterRepeatingTask(server.processLoop, "process_loop", time.Hour)
+	server.RegisterRepeatingTask(server.checkLoop, "check_loop", time.Hour)
 
 	server.Serve()
 }
