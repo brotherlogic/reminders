@@ -12,6 +12,7 @@ import (
 
 func (s *Server) refresh(ctx context.Context) {
 	for _, tl := range s.data.GetTasks() {
+		s.Log(fmt.Sprintf("Processing %v", tl.GetName()))
 		s.processTaskList(ctx, tl)
 	}
 }
@@ -77,6 +78,7 @@ func (s *Server) getReminders(t time.Time) []*pb.Reminder {
 }
 
 func (s *Server) adjustRunTime(r *pb.Reminder) {
+	s.Log(fmt.Sprintf("Adjusting for %v", r.Text))
 	t := time.Now()
 	ct := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 	_, week := ct.ISOWeek()
