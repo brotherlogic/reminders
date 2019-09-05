@@ -69,7 +69,7 @@ func (s *Server) getReminders(t time.Time) []*pb.Reminder {
 		for _, r := range s.data.List.Reminders {
 			if r.NextRunTime < t.Unix() {
 				s.adjustRunTime(r)
-				s.Log(fmt.Sprintf("Adjusted"))
+				s.Log(fmt.Sprintf("Adjusted %v", r.Text))
 				reminders = append(reminders, r)
 			}
 		}
