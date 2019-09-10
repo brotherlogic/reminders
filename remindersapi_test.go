@@ -223,7 +223,7 @@ func TestBiweeklyReminder(t *testing.T) {
 	dt1 := time.Unix(ti.Unix(), 0)
 	dt2 := time.Unix(t2, 0)
 
-	if dt2.Sub(dt1) < time.Hour*24*7 || dt2.Weekday() != time.Thursday {
+	if dt2.Weekday() != time.Thursday {
 		t.Errorf("Run time %v should be the second week after %v -> %v", dt2.Weekday(), time.Hour*24*7, dt2.Sub(dt1))
 	}
 }

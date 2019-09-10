@@ -226,8 +226,10 @@ func (s *Server) GetState() []*pbg.State {
 }
 
 func (s *Server) checkLoop(ctx context.Context) error {
-	if time.Now().Sub(s.lastBasicRun) > time.Hour*12 {
-		s.RaiseIssue(ctx, "Reminders Error", fmt.Sprintf("Reminders haven't been processed since %v", s.lastBasicRun), false)
+	if s.lastBasicRun.Unix() > 0 {
+		if time.Now().Sub(s.lastBasicRun) > time.Hour*12 {
+			s.RaiseIssue(ctx, "Reminders Error", fmt.Sprintf("Reminders haven't been processed since %v", s.lastBasicRun), false)
+		}
 	}
 	return nil
 }
