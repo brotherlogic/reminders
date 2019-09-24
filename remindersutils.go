@@ -33,7 +33,7 @@ func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) {
 					err2 := s.silence.addSilence(ctx, sil, fmt.Sprintf("%v", task.Uid))
 					if err2 != nil {
 						s.pushFail++
-						s.pushFailure = fmt.Sprintf("%v", err)
+						s.pushFailure = fmt.Sprintf("silence - %v", err)
 						s.Log(fmt.Sprintf("Error adding silence %v", err2))
 						return
 					}
@@ -45,7 +45,7 @@ func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) {
 				s.save(ctx)
 			} else {
 				s.pushFail++
-				s.pushFailure = fmt.Sprintf("%v", err)
+				s.pushFailure = fmt.Sprintf("add issue - %v", err)
 				s.Log(fmt.Sprintf("Error adding issue %v", err))
 			}
 
