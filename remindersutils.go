@@ -34,6 +34,7 @@ func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) {
 					if err2 != nil {
 						s.pushFail++
 						s.pushFailure = fmt.Sprintf("%v", err)
+						s.Log(fmt.Sprintf("Error adding silence %v", err2))
 						return
 					}
 				}
@@ -45,6 +46,7 @@ func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) {
 			} else {
 				s.pushFail++
 				s.pushFailure = fmt.Sprintf("%v", err)
+				s.Log(fmt.Sprintf("Error adding issue %v", err))
 			}
 
 			return
@@ -52,7 +54,7 @@ func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) {
 			if s.ghbridge.isComplete(ctx, task) {
 				err := s.silence.removeSilence(ctx, fmt.Sprintf("%v", task.Uid))
 				if err != nil {
-					s.Log(fmt.Sprintf("Unable to silence"))
+					s.Log(fmt.Sprintf("Unable to unsilence"))
 				}
 				task.CurrentState = pb.Reminder_COMPLETE
 			} else {
