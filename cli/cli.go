@@ -18,7 +18,7 @@ import (
 
 func main() {
 
-	host, port, _ := utils.Resolve("reminders")
+	host, port, _ := utils.Resolve("reminders", "reminders-cli")
 	conn, err := grpc.Dial(host+":"+strconv.Itoa(int(port)), grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Unable to dial: %v", err)
