@@ -64,8 +64,11 @@ func (ps *prodSilence) removeSilence(ctx context.Context, key string) error {
 	}
 
 	client := pbgh.NewGithubClient(conn)
-	_, err = client.Silence(ctx, &pbgh.SilenceRequest{Origin: key, State: pbgh.SilenceRequest_UNSILENCE})
-	return err
+	err = nil
+	for err == nil {
+		_, err = client.Silence(ctx, &pbgh.SilenceRequest{Origin: key, State: pbgh.SilenceRequest_UNSILENCE})
+	}
+	return nil
 }
 
 type gsGHBridge struct {
