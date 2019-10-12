@@ -11,13 +11,18 @@ import (
 )
 
 func (s *Server) refresh(ctx context.Context) {
+	complete := false
 	for _, tl := range s.data.GetTasks() {
 		s.Log(fmt.Sprintf("Processing %v", tl.GetName()))
-		s.processTaskList(ctx, tl)
+		complete = complete || s.processTaskList(ctx, tl)
+	}
+
+	if !complete {
+		s.RaiseIssue(ctx, "No tasklists to process", "Everything is complete", false)
 	}
 }
 
-func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) {
+func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) bool {
 	for _, task := range t.Tasks.Reminders {
 
 		//Reassign a task with an empty id
@@ -35,7 +40,7 @@ func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) {
 						s.pushFail++
 						s.pushFailure = fmt.Sprintf("silence - %v", err)
 						s.Log(fmt.Sprintf("Error adding silence %v", err2))
-						return
+						return true
 					}
 				}
 				task.CurrentState = pb.Reminder_ASSIGNED
@@ -49,7 +54,7 @@ func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) {
 				s.Log(fmt.Sprintf("Error adding issue %v", err))
 			}
 
-			return
+			return true
 		case pb.Reminder_ASSIGNED:
 			if s.ghbridge.isComplete(ctx, task) {
 				err := s.silence.removeSilence(ctx, fmt.Sprintf("%v", task.Uid))
@@ -58,10 +63,12 @@ func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) {
 				}
 				task.CurrentState = pb.Reminder_COMPLETE
 			} else {
-				return
+				return true
 			}
 		}
 	}
+
+	return false
 }
 
 func (s *Server) getReminders(t time.Time) []*pb.Reminder {
