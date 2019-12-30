@@ -245,7 +245,7 @@ func main() {
 
 	server := InitServer()
 	server.Register = server
-	server.RegisterServer("reminders", false)
+	server.RegisterServerV2("reminders", false, false)
 
 	//Update the tasks every 24 hours
 	server.RegisterRepeatingTask(server.processLoop, "process_loop", time.Hour)
