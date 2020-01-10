@@ -16,10 +16,6 @@ func (s *Server) refresh(ctx context.Context) {
 		s.Log(fmt.Sprintf("Processing %v", tl.GetName()))
 		complete = complete || s.processTaskList(ctx, tl)
 	}
-
-	if !complete {
-		s.RaiseIssue(ctx, "No tasklists to process", "Everything is complete", false)
-	}
 }
 
 func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) bool {
