@@ -143,7 +143,7 @@ func InitServer() *Server {
 	server.ghbridge = gsGHBridge{dial: server.DialMaster, log: server.Log}
 	server.PrepServer()
 	server.GoServer.KSclient = *keystoreclient.GetClient(server.DialMaster)
-	server.silence = &prodSilence{dial: server.DialMaster}
+	server.silence = &prodSilence{dial: server.NewBaseDial}
 	return server
 }
 
