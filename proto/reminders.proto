@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package reminders;
 
+option go_package = ".;reminders";
+
 message ReminderConfig {
   ReminderList list = 1;
   repeated TaskList tasks = 2;
