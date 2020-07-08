@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"google.golang.org/grpc"
 
@@ -50,8 +51,7 @@ func main() {
 			}
 		case "add":
 			reminder := os.Args[2]
-			//day := os.Args[3]
-			_, err = client.AddReminder(ctx, &pb.Reminder{Text: reminder, RepeatPeriod: pb.Reminder_BIWEEKLY, DayOfWeek: "Wednesday"})
+			_, err = client.AddReminder(ctx, &pb.Reminder{Text: reminder, RepeatPeriodInSeconds: int64((time.Hour * 365 * 24).Seconds())})
 			if err != nil {
 				log.Fatalf("Unable to add reminder: %v", err)
 			}
