@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/brotherlogic/goserver"
-	"github.com/brotherlogic/keystore/client"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
@@ -141,9 +140,10 @@ func (s *Server) save(ctx context.Context) {
 func InitServer() *Server {
 	server := &Server{GoServer: &goserver.GoServer{}, data: &pb.ReminderConfig{List: &pb.ReminderList{Reminders: make([]*pb.Reminder, 0)}, Tasks: make([]*pb.TaskList, 0)}}
 	server.ghbridge = gsGHBridge{dial: server.DialMaster, log: server.Log}
-	server.PrepServer()
-	server.GoServer.KSclient = *keystoreclient.GetClient(server.DialMaster)
 	server.silence = &prodSilence{dial: server.NewBaseDial}
+
+	server.PrepServer()
+
 	return server
 }
 
@@ -216,21 +216,7 @@ func (s *Server) ReportHealth() bool {
 
 // GetState gets the state of the server
 func (s *Server) GetState() []*pbg.State {
-	return []*pbg.State{
-		&pbg.State{Key: "last_update_time", TimeValue: s.lastBasicRun.Unix()},
-		&pbg.State{Key: "push_count", Value: s.pushCount},
-		&pbg.State{Key: "push_fail", Value: s.pushFail},
-		&pbg.State{Key: "push_fail_reason", Text: s.pushFailure},
-	}
-}
-
-func (s *Server) checkLoop(ctx context.Context) error {
-	if s.lastBasicRun.Unix() > 0 {
-		if time.Now().Sub(s.lastBasicRun) > time.Hour*12 {
-			s.RaiseIssue(ctx, "Reminders Error", fmt.Sprintf("Reminders haven't been processed since %v", s.lastBasicRun), false)
-		}
-	}
-	return nil
+	return []*pbg.State{}
 }
 
 func main() {
@@ -246,14 +232,10 @@ func main() {
 	server := InitServer()
 	server.Register = server
 
-	err := server.RegisterServerV2("reminders", false, false)
+	err := server.RegisterServerV2("reminders", false, true)
 	if err != nil {
 		return
 	}
-
-	//Update the tasks every 24 hours
-	server.RegisterRepeatingTask(server.processLoop, "process_loop", time.Hour)
-	server.RegisterRepeatingTask(server.checkLoop, "check_loop", time.Hour)
 
 	server.Serve()
 }
