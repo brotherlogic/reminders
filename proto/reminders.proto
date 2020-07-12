@@ -73,7 +73,7 @@ message DeleteResponse {
 }
 
 service Reminders {
-	rpc AddReminder(Reminder) returns (Empty) {};
+  rpc AddReminder(Reminder) returns (Empty) {};
   rpc ListReminders(Empty) returns (ReminderConfig) {};
   rpc AddTaskList(TaskList) returns (Empty) {};
   rpc DeleteTask(DeleteRequest) returns (DeleteResponse) {};

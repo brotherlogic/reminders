@@ -17,7 +17,7 @@ type githubBridge interface {
 func (s *Server) AddReminder(ctx context.Context, in *pb.Reminder) (*pb.Empty, error) {
 	in.Uid = time.Now().UnixNano()
 	s.data.List.Reminders = append(s.data.List.Reminders, in)
-	s.save(ctx)
+	//s.save(ctx)
 	return &pb.Empty{}, nil
 }
 
@@ -35,7 +35,7 @@ func (s *Server) AddTaskList(ctx context.Context, in *pb.TaskList) (*pb.Empty, e
 	}
 
 	s.data.Tasks = append(s.data.Tasks, in)
-	s.save(ctx)
+	//s.save(ctx)
 	go s.processTaskList(ctx, in)
 
 	return &pb.Empty{}, nil
@@ -57,6 +57,6 @@ func (s *Server) DeleteTask(ctx context.Context, in *pb.DeleteRequest) (*pb.Dele
 		}
 	}
 
-	s.save(ctx)
+	//s.save(ctx)
 	return &pb.DeleteResponse{}, nil
 }

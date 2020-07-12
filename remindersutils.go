@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"time"
 
 	"golang.org/x/net/context"
 
 	pbgh "github.com/brotherlogic/githubcard/proto"
+	"github.com/brotherlogic/goserver/utils"
 	pb "github.com/brotherlogic/reminders/proto"
 )
 
@@ -43,7 +45,7 @@ func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) bool {
 				s.pushCount++
 				task.GithubId = t
 				s.last = &pbgh.Issue{Service: task.GithubId}
-				s.save(ctx)
+				//				s.save(ctx)
 			} else {
 				s.pushFail++
 				s.pushFailure = fmt.Sprintf("add issue - %v", err)
@@ -114,5 +116,26 @@ func (s *Server) adjustRunTime(r *pb.Reminder) {
 		}
 
 		r.NextRunTime = ct.Unix()
+	}
+}
+
+func (s *Server) runOnce() {
+	ctx, cancel := utils.ManualContext("reminder-loop", "reminder-loop", time.Minute, true)
+	defer cancel()
+
+	config, err := s.loadReminders(ctx)
+	if err != nil {
+		s.Log(fmt.Sprintf("Unable to load reminders: %v", err))
+		return
+	}
+
+	sort.SliceStable(config.List.Reminders, func(i, j int) bool {
+		return config.List.Reminders[i].GetNextRunTime() < config.List.Reminders[j].GetNextRunTime()
+	})
+
+	if len(config.List.Reminders) > 0 && time.Now().After(time.Unix(config.List.Reminders[0].GetNextRunTime(), 0)) {
+		s.ghbridge.addIssue(ctx, config.List.Reminders[0])
+		s.adjustRunTime(config.List.Reminders[0])
+		s.save(ctx, config)
 	}
 }
