@@ -29,6 +29,7 @@ type Server struct {
 	pushFail     int64
 	pushFailure  string
 	silence      silence
+	running      bool
 }
 
 const (
@@ -83,8 +84,30 @@ func (s *Server) processLoop(ctx context.Context) error {
 	for _, r := range rs {
 		s.ghbridge.addIssue(ctx, r)
 	}
-	s.save(ctx)
+	//s.save(ctx)
 	return nil
+}
+
+func (s *Server) run() {
+	for s.running {
+		nextRunTime := s.runFull()
+		sleepTime := nextRunTime.Sub(time.Now())
+		s.Log(fmt.Sprintf("Sleeping for %v", sleepTime))
+		time.Sleep(sleepTime)
+	}
+}
+
+func (s *Server) runFull() time.Time {
+	comp, err := s.Elect()
+	if err != nil {
+		s.Log(fmt.Sprintf("Error on elect: %v", err))
+		return time.Now().Add(time.Minute)
+	}
+	defer comp()
+
+	s.Log("I have been run")
+	time.Sleep(time.Second * 5)
+	return time.Now().Add(time.Minute)
 }
 
 func (g gsGHBridge) addIssue(ctx context.Context, r *pb.Reminder) (string, error) {
@@ -132,8 +155,8 @@ func (g gsGHBridge) isComplete(ctx context.Context, r *pb.Reminder) bool {
 	return resp.GetState() == pbgh.Issue_CLOSED
 }
 
-func (s *Server) save(ctx context.Context) {
-	s.KSclient.Save(ctx, KEY, s.data)
+func (s *Server) save(ctx context.Context, config *pb.ReminderConfig) {
+	s.KSclient.Save(ctx, KEY, config)
 }
 
 // InitServer builds an initial server
@@ -147,40 +170,17 @@ func InitServer() *Server {
 	return server
 }
 
-func (s *Server) loadReminders(ctx context.Context) error {
+func (s *Server) loadReminders(ctx context.Context) (*pb.ReminderConfig, error) {
 	config := &pb.ReminderConfig{}
 	data, _, err := s.KSclient.Read(ctx, KEY, config)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	s.data = data.(*pb.ReminderConfig)
+	config = data.(*pb.ReminderConfig)
 
-	found := false
-	for _, reminder := range s.data.GetList().GetReminders() {
-		if reminder.GetUid() == 0 {
-			reminder.Uid = time.Now().UnixNano()
-			time.Sleep(time.Millisecond)
-			found = true
-		}
-	}
-
-	for _, tasklist := range s.data.GetTasks() {
-		for _, reminder := range tasklist.GetTasks().GetReminders() {
-			if reminder.GetUid() == 0 {
-				reminder.Uid = time.Now().UnixNano()
-				time.Sleep(time.Millisecond)
-				found = true
-			}
-		}
-	}
-
-	if found {
-		s.save(ctx)
-	}
-
-	return nil
+	return config, nil
 }
 
 // DoRegister does RPC registration
@@ -190,22 +190,11 @@ func (s *Server) DoRegister(server *grpc.Server) {
 
 // Shutdown the server
 func (s *Server) Shutdown(ctx context.Context) error {
-	s.save(ctx)
 	return nil
 }
 
 // Mote promotes/demotes this server
 func (s *Server) Mote(ctx context.Context, master bool) error {
-	if master {
-		err := s.loadReminders(ctx)
-		if err != nil {
-			return err
-		}
-		if s.data.List != nil && s.data.List.Reminders != nil && len(s.data.List.Reminders) == 0 {
-			s.Log(fmt.Sprintf("No reminders loaded: %v", s.data))
-			return fmt.Errorf("Unable to load reminders")
-		}
-	}
 	return nil
 }
 
