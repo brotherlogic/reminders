@@ -76,7 +76,7 @@ func TestAddTaskListWithFail(t *testing.T) {
 	}
 
 	if s.pushFail != 1 {
-		t.Errorf("Fail did not increment fail count")
+		t.Errorf("Fail did not increment fail count: %v", s.pushFail)
 	}
 }
 
