@@ -227,7 +227,7 @@ func main() {
 	}
 
 	server.running = true
-	//go server.run()
+	go server.run()
 
 	server.Serve()
 }
