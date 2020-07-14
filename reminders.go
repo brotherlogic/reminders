@@ -105,7 +105,7 @@ func (s *Server) runFull() time.Time {
 	}
 	defer comp()
 
-	s.Log("I have been run")
+	s.runOnce()
 	time.Sleep(time.Second * 5)
 	return time.Now().Add(time.Minute)
 }
