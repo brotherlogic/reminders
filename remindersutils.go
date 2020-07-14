@@ -134,8 +134,9 @@ func (s *Server) runOnce() {
 	})
 
 	if len(config.List.Reminders) > 0 && time.Now().After(time.Unix(config.List.Reminders[0].GetNextRunTime(), 0)) {
-		s.ghbridge.addIssue(ctx, config.List.Reminders[0])
-		s.adjustRunTime(config.List.Reminders[0])
-		s.save(ctx, config)
+		s.Log(fmt.Sprintf("Adding reminder: %v", config.List.Reminders[0]))
+		//s.ghbridge.addIssue(ctx, config.List.Reminders[0])
+		//s.adjustRunTime(config.List.Reminders[0])
+		//s.save(ctx, config)
 	}
 }
