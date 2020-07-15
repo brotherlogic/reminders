@@ -15,15 +15,27 @@ type githubBridge interface {
 
 //AddReminder adds a reminder into the system
 func (s *Server) AddReminder(ctx context.Context, in *pb.Reminder) (*pb.Empty, error) {
+	config, err := s.loadReminders(ctx)
+	if err != nil {
+		return nil, err
+	}
 	in.Uid = time.Now().UnixNano()
-	s.data.List.Reminders = append(s.data.List.Reminders, in)
-	//s.save(ctx)
-	return &pb.Empty{}, nil
+	if config.List == nil {
+		config.List = &pb.ReminderList{}
+	}
+	config.GetList().Reminders = append(config.GetList().GetReminders(), in)
+
+	return &pb.Empty{}, s.save(ctx, config)
 }
 
 //ListReminders lists all the available reminders
 func (s *Server) ListReminders(ctx context.Context, in *pb.Empty) (*pb.ReminderConfig, error) {
-	return s.data, nil
+	config, err := s.loadReminders(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return config, nil
 }
 
 //AddTaskList adds a task list into the system
