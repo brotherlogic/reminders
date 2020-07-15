@@ -12,6 +12,8 @@ message ReminderConfig {
 message Reminder {
   string text = 1;
 
+  string server = 11;
+  
   // Text day of the week
   string day_of_week = 2;
 
@@ -77,4 +79,11 @@ service Reminders {
   rpc ListReminders(Empty) returns (ReminderConfig) {};
   rpc AddTaskList(TaskList) returns (Empty) {};
   rpc DeleteTask(DeleteRequest) returns (DeleteResponse) {};
+}
+
+message ReceiveRequest {}
+message ReceiveResponse {}
+
+service ReminderReceiver {
+  rpc Receive(ReceiveRequest) returns (ReceiveResponse) {};
 }

@@ -76,6 +76,18 @@ type gsGHBridge struct {
 	log  func(logs string)
 }
 
+func (s *Server) pingServer(ctx context.Context, server string) error {
+	conn, err := s.FDialServer(ctx, server)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client := pb.NewReminderReceiverClient(conn)
+	_, err = client.Receive(ctx, &pb.ReceiveRequest{})
+	return err
+}
+
 func (s *Server) processLoop(ctx context.Context) error {
 	s.lastBasicRun = time.Now()
 	s.refresh(ctx)
