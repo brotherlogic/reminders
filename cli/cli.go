@@ -9,8 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"google.golang.org/grpc"
-
 	"github.com/brotherlogic/goserver/utils"
 	pb "github.com/brotherlogic/reminders/proto"
 
@@ -18,16 +16,14 @@ import (
 )
 
 func main() {
+	ctx, cancel := utils.BuildContext("reminders_cli_"+os.Args[1], "reminders")
+	defer cancel()
 
-	host, port, _ := utils.Resolve("reminders", "reminders-cli")
-	conn, err := grpc.Dial(host+":"+strconv.Itoa(int(port)), grpc.WithInsecure())
+	conn, err := utils.LFDialServer(ctx, "reminders")
 	if err != nil {
 		log.Fatalf("Unable to dial: %v", err)
 	}
 	defer conn.Close()
-
-	ctx, cancel := utils.BuildContext("reminders_cli_"+os.Args[1], "reminders")
-	defer cancel()
 
 	client := pb.NewRemindersClient(conn)
 
@@ -48,6 +44,12 @@ func main() {
 				for j, item := range task.Tasks.Reminders {
 					fmt.Printf("%v.%v. %v\n", i, j, item)
 				}
+			}
+		case "server":
+			reminder := os.Args[2]
+			_, err = client.AddReminder(ctx, &pb.Reminder{Server: reminder, RepeatPeriodInSeconds: int64((time.Hour).Seconds())})
+			if err != nil {
+				log.Fatalf("Unable to add reminder: %v", err)
 			}
 		case "add":
 			reminder := os.Args[2]

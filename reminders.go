@@ -167,8 +167,8 @@ func (g gsGHBridge) isComplete(ctx context.Context, r *pb.Reminder) bool {
 	return resp.GetState() == pbgh.Issue_CLOSED
 }
 
-func (s *Server) save(ctx context.Context, config *pb.ReminderConfig) {
-	s.KSclient.Save(ctx, KEY, config)
+func (s *Server) save(ctx context.Context, config *pb.ReminderConfig) error {
+	return s.KSclient.Save(ctx, KEY, config)
 }
 
 // InitServer builds an initial server

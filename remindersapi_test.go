@@ -60,8 +60,10 @@ func InitTestServer(foldername string) *Server {
 	server := &Server{data: &pb.ReminderConfig{List: &pb.ReminderList{Reminders: make([]*pb.Reminder, 0)}, Tasks: make([]*pb.TaskList, 0)}, ghbridge: testGHBridge{completes: make(map[string]bool), issues: make(map[string]string)}}
 	server.GoServer = &goserver.GoServer{}
 	server.SkipLog = true
+	server.SkipIssue = true
 	server.Register = server
 	server.GoServer.KSclient = *keystoreclient.GetTestClient(foldername)
+	server.GoServer.KSclient.Save(context.Background(), KEY, &pb.ReminderConfig{})
 	server.silence = &testSilence{}
 	return server
 }
