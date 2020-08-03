@@ -111,11 +111,11 @@ func (s *Server) run() {
 
 func (s *Server) runFull() time.Time {
 	comp, err := s.Elect()
+	defer comp()
 	if err != nil {
 		s.Log(fmt.Sprintf("Error on elect: %v", err))
 		return time.Now().Add(time.Minute)
 	}
-	defer comp()
 
 	s.runOnce()
 	time.Sleep(time.Second * 5)
