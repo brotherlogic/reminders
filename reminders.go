@@ -240,6 +240,7 @@ func main() {
 		return
 	}
 
+	server.DiskLog = true
 	server.running = true
 	go server.run()
 
