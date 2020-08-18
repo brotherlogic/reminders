@@ -218,7 +218,7 @@ func (s *Server) ReportHealth() bool {
 // GetState gets the state of the server
 func (s *Server) GetState() []*pbg.State {
 	return []*pbg.State{
-		&pbg.State{Key: "blah", Value: int64(25)},
+		&pbg.State{Key: "blah", Value: int64(26)},
 	}
 }
 
