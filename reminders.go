@@ -43,11 +43,11 @@ type silence interface {
 }
 
 type prodSilence struct {
-	dial func(server string) (*grpc.ClientConn, error)
+	dial func(ctx context.Context, server string) (*grpc.ClientConn, error)
 }
 
 func (ps *prodSilence) addSilence(ctx context.Context, silence, key string) error {
-	conn, err := ps.dial("githubcard")
+	conn, err := ps.dial(ctx, "githubcard")
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (ps *prodSilence) addSilence(ctx context.Context, silence, key string) erro
 }
 
 func (ps *prodSilence) removeSilence(ctx context.Context, key string) error {
-	conn, err := ps.dial("githubcard")
+	conn, err := ps.dial(ctx, "githubcard")
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func (ps *prodSilence) removeSilence(ctx context.Context, key string) error {
 }
 
 type gsGHBridge struct {
-	dial func(server string) (*grpc.ClientConn, error)
+	dial func(ctx context.Context, server string) (*grpc.ClientConn, error)
 	log  func(logs string)
 }
 
@@ -123,7 +123,7 @@ func (s *Server) runFull() time.Time {
 }
 
 func (g gsGHBridge) addIssue(ctx context.Context, r *pb.Reminder) (string, error) {
-	conn, err := g.dial("githubcard")
+	conn, err := g.dial(ctx, "githubcard")
 	if err != nil {
 		return "", err
 	}
@@ -142,7 +142,7 @@ func (g gsGHBridge) addIssue(ctx context.Context, r *pb.Reminder) (string, error
 }
 
 func (g gsGHBridge) isComplete(ctx context.Context, r *pb.Reminder) bool {
-	conn, err := g.dial("githubcard")
+	conn, err := g.dial(ctx, "githubcard")
 	if err != nil {
 		g.log(fmt.Sprintf("DIAL FAIL: %v", err))
 		return false
@@ -174,8 +174,8 @@ func (s *Server) save(ctx context.Context, config *pb.ReminderConfig) error {
 // InitServer builds an initial server
 func InitServer() *Server {
 	server := &Server{GoServer: &goserver.GoServer{}, data: &pb.ReminderConfig{List: &pb.ReminderList{Reminders: make([]*pb.Reminder, 0)}, Tasks: make([]*pb.TaskList, 0)}}
-	server.ghbridge = gsGHBridge{dial: server.DialMaster, log: server.Log}
-	server.silence = &prodSilence{dial: server.NewBaseDial}
+	server.ghbridge = gsGHBridge{dial: server.FDialServer, log: server.Log}
+	server.silence = &prodSilence{dial: server.FDialServer}
 
 	server.PrepServer()
 
