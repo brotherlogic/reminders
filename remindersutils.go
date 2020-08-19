@@ -119,7 +119,7 @@ func (s *Server) adjustRunTime(r *pb.Reminder) {
 	}
 }
 
-func (s *Server) writeReminder(ctx context.Context, reminder *pb.Reminder) {
+func (s *Server) writeReminder(ctx context.Context, reminder *pb.Reminder) (err error) {
 	if len(reminder.GetServer()) == 0 {
 		blah, err := s.ghbridge.addIssue(ctx, reminder)
 		s.Log(fmt.Sprintf("Added reminder %v -> %v", blah, err))
@@ -127,6 +127,7 @@ func (s *Server) writeReminder(ctx context.Context, reminder *pb.Reminder) {
 		err := s.pingServer(ctx, reminder.GetServer())
 		s.Log(fmt.Sprintf("Pinged %v -> %v", reminder.GetServer(), err))
 	}
+	return err
 }
 
 func (s *Server) runOnce() {
@@ -144,8 +145,10 @@ func (s *Server) runOnce() {
 	})
 
 	if len(config.List.Reminders) > 0 && time.Now().After(time.Unix(config.List.Reminders[0].GetNextRunTime(), 0)) {
-		s.writeReminder(ctx, config.List.Reminders[0])
-		s.adjustRunTime(config.List.Reminders[0])
-		s.save(ctx, config)
+		err := s.writeReminder(ctx, config.List.Reminders[0])
+		if err != nil {
+			s.adjustRunTime(config.List.Reminders[0])
+			s.save(ctx, config)
+		}
 	}
 }
