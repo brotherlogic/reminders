@@ -148,7 +148,11 @@ func (s *Server) runOnce() {
 		err := s.writeReminder(ctx, config.List.Reminders[0])
 		if err != nil {
 			s.adjustRunTime(config.List.Reminders[0])
-			s.save(ctx, config)
+			err := s.save(ctx, config)
+			if err != nil {
+				time.Sleep(time.Second * 2)
+				s.Log(fmt.Sprintf("Unable to save reminders: %v", err))
+			}
 		}
 	}
 }
