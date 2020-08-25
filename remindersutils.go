@@ -146,7 +146,7 @@ func (s *Server) runOnce() {
 
 	if len(config.List.Reminders) > 0 && time.Now().After(time.Unix(config.List.Reminders[0].GetNextRunTime(), 0)) {
 		err := s.writeReminder(ctx, config.List.Reminders[0])
-		if err != nil {
+		if err == nil {
 			s.adjustRunTime(config.List.Reminders[0])
 			err := s.save(ctx, config)
 			if err != nil {
