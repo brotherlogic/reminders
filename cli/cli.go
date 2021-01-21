@@ -82,10 +82,11 @@ func main() {
 			if err != nil {
 				log.Fatalf("Unable to convert UID: %v", err)
 			}
-			_, err = client.DeleteTask(ctx, &pb.DeleteRequest{Uid: int64(uid)})
+			resp, err := client.DeleteTask(ctx, &pb.DeleteRequest{Uid: int64(uid)})
 			if err != nil {
 				log.Fatalf("Delete failed: %v", err)
 			}
+			log.Printf("Got here: %v", resp)
 		}
 	}
 }
