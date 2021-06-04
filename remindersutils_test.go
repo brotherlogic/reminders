@@ -194,6 +194,11 @@ func TestBasicPing(t *testing.T) {
 	s.runOnce()
 }
 
+func TestEmptyRun(t *testing.T) {
+	s := InitTestServer(".testbasicreminder")
+	s.runOnce()
+}
+
 func TestRunOnceFail(t *testing.T) {
 	s := InitTestServer(".testbasicreminder")
 	s.GoServer.KSclient.Fail = true
