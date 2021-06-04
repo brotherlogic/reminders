@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/brotherlogic/goserver"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
@@ -31,6 +33,17 @@ type Server struct {
 	silence      silence
 	running      bool
 }
+
+var (
+	tasklistSize = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "reminders_tasklist",
+		Help: "The size of the print queue",
+	})
+	taskSize = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "reminders_task",
+		Help: "The size of the print queue",
+	})
+)
 
 const (
 	//KEY under which we store the config data
@@ -179,6 +192,9 @@ func (s *Server) loadReminders(ctx context.Context) (*pb.ReminderConfig, error) 
 	}
 
 	config = data.(*pb.ReminderConfig)
+
+	tasklistSize.Set(float64(len(config.GetTasks())))
+	taskSize.Set(float64(len(config.GetList().GetReminders())))
 
 	return config, nil
 }
