@@ -65,14 +65,6 @@ func (s *Server) DeleteTask(ctx context.Context, in *pb.DeleteRequest) (*pb.Dele
 		}
 	}
 
-	for _, tasklist := range config.GetTasks() {
-		for i, reminder := range tasklist.GetTasks().GetReminders() {
-			if reminder.GetUid() == in.GetUid() {
-				tasklist.GetTasks().Reminders = append(tasklist.GetTasks().Reminders[:i], tasklist.GetTasks().Reminders[i+1:]...)
-			}
-		}
-	}
-
 	s.save(ctx, config)
 	return &pb.DeleteResponse{}, nil
 }

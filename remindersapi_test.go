@@ -178,6 +178,36 @@ func TestAddList(t *testing.T) {
 	}
 }
 
+func TestAddReminderWithLoadFail(t *testing.T) {
+	s := InitTestServer(".testaddlist")
+	s.GoServer.KSclient.Fail = true
+
+	_, err := s.AddReminder(context.Background(), &pb.Reminder{Text: "Hello"})
+	if err == nil {
+		t.Fatalf("Add reminder did not fail: %v", err)
+	}
+}
+
+func TestListWithFail(t *testing.T) {
+	s := InitTestServer(".testaddlist")
+	s.GoServer.KSclient.Fail = true
+
+	rs, err := s.ListReminders(context.Background(), &pb.Empty{})
+	if err == nil {
+		t.Fatalf("List reminders did not fail: %v", rs)
+	}
+}
+
+func TestDeleteWithFail(t *testing.T) {
+	s := InitTestServer(".testdeletelist")
+	s.GoServer.KSclient.Fail = true
+
+	rs, err := s.DeleteTask(context.Background(), &pb.DeleteRequest{})
+	if err == nil {
+		t.Fatalf("List reminders did not fail: %v", rs)
+	}
+}
+
 func TestDeleteDaily(t *testing.T) {
 	s := InitTestServer(".testmonthlyreminder")
 
