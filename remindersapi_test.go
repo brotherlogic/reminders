@@ -68,6 +68,7 @@ func InitTestServer(foldername string) *Server {
 	server.GoServer.KSclient = *keystoreclient.GetTestClient(foldername)
 	server.GoServer.KSclient.Save(context.Background(), KEY, &pb.ReminderConfig{})
 	server.silence = &testSilence{}
+	server.test = true
 	return server
 }
 

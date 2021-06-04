@@ -32,6 +32,7 @@ type Server struct {
 	pushFailure  string
 	silence      silence
 	running      bool
+	test         bool
 }
 
 var (
@@ -90,6 +91,9 @@ type gsGHBridge struct {
 }
 
 func (s *Server) pingServer(ctx context.Context, server string) error {
+	if s.test {
+		return nil
+	}
 	conn, err := s.FDialServer(ctx, server)
 	if err != nil {
 		return err

@@ -181,6 +181,19 @@ func TestBasicReminderWithTwo(t *testing.T) {
 	}
 }
 
+func TestBasicPing(t *testing.T) {
+	s := InitTestServer(".testbasicreminder")
+
+	t1 := time.Now()
+	_, err := s.AddReminder(context.Background(), &pb.Reminder{Server: "blah", NextRunTime: t1.Unix(), RepeatPeriod: pb.Reminder_DAILY})
+
+	if err != nil {
+		t.Fatalf("Unable to add reminder: %v", err)
+	}
+
+	s.runOnce()
+}
+
 func TestRunOnceFail(t *testing.T) {
 	s := InitTestServer(".testbasicreminder")
 	s.GoServer.KSclient.Fail = true
