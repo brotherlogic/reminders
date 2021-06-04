@@ -6,7 +6,6 @@ option go_package = ".;reminders";
 
 message ReminderConfig {
   ReminderList list = 1;
-  repeated TaskList tasks = 2;
 }
 
 message Reminder {
@@ -62,10 +61,6 @@ message ReminderList {
   repeated Reminder reminders = 1;
 }
 
-message TaskList {
-  string name = 1;
-  ReminderList tasks = 2;
-}
 
 message DeleteRequest {
   int64 uid = 1;
@@ -78,7 +73,6 @@ message DeleteResponse {
 service Reminders {
   rpc AddReminder(Reminder) returns (Empty) {};
   rpc ListReminders(Empty) returns (ReminderConfig) {};
-  rpc AddTaskList(TaskList) returns (Empty) {};
   rpc DeleteTask(DeleteRequest) returns (DeleteResponse) {};
 }
 

@@ -69,22 +69,6 @@ func (s *Server) processTaskList(ctx context.Context, t *pb.TaskList) bool {
 	return false
 }
 
-func (s *Server) getReminders(t time.Time) []*pb.Reminder {
-	reminders := make([]*pb.Reminder, 0)
-
-	if s.data.List != nil && s.data.List.Reminders != nil {
-		for _, r := range s.data.List.Reminders {
-			if r.NextRunTime < t.Unix() {
-				s.adjustRunTime(r)
-				s.Log(fmt.Sprintf("Adjusted %v", r.Text))
-				reminders = append(reminders, r)
-			}
-		}
-	}
-
-	return reminders
-}
-
 func (s *Server) adjustRunTime(r *pb.Reminder) {
 	s.Log(fmt.Sprintf("Adjusting for %v", r.Text))
 	t := time.Now()

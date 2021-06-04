@@ -88,18 +88,6 @@ func (s *Server) pingServer(ctx context.Context, server string) error {
 	return err
 }
 
-func (s *Server) processLoop(ctx context.Context) error {
-	s.lastBasicRun = time.Now()
-	s.refresh(ctx)
-	s.Log(fmt.Sprintf("Getting Reminders"))
-	rs := s.getReminders(time.Now())
-	for _, r := range rs {
-		s.ghbridge.addIssue(ctx, r)
-	}
-	//s.save(ctx)
-	return nil
-}
-
 func (s *Server) run() {
 	for s.running {
 		nextRunTime := s.runFull()
@@ -217,9 +205,7 @@ func (s *Server) ReportHealth() bool {
 
 // GetState gets the state of the server
 func (s *Server) GetState() []*pbg.State {
-	return []*pbg.State{
-		&pbg.State{Key: "blah", Value: int64(26)},
-	}
+	return []*pbg.State{}
 }
 
 func main() {
