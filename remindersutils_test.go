@@ -154,6 +154,41 @@ func TestBasicReminderYearly(t *testing.T) {
 	}
 }
 
+func TestBasicReminderWithTwo(t *testing.T) {
+	s := InitTestServer(".testbasicreminder")
+
+	t1 := time.Now()
+	_, err := s.AddReminder(context.Background(), &pb.Reminder{NextRunTime: t1.Unix(), RepeatPeriod: pb.Reminder_YEARLY})
+	_, err = s.AddReminder(context.Background(), &pb.Reminder{Server: "blah", NextRunTime: t1.Unix(), RepeatPeriod: pb.Reminder_DAILY})
+
+	if err != nil {
+		t.Fatalf("Unable to add reminder: %v", err)
+	}
+
+	s.runOnce()
+
+	if len(s.ghbridge.(testGHBridge).issues) != 1 {
+		t.Errorf("Issue not added")
+	}
+
+	next, err := s.ListReminders(context.Background(), &pb.Empty{})
+	if len(next.GetList().GetReminders()) == 0 {
+		t.Errorf("No tasks listed")
+	}
+
+	if time.Unix(next.GetList().GetReminders()[0].GetNextRunTime(), 0).Sub(t1) < time.Hour*24*364 {
+		t.Errorf("Time gap is too small: %v", time.Unix(next.GetList().GetReminders()[0].GetNextRunTime(), 0).Sub(t1))
+	}
+}
+
+func TestRunOnceFail(t *testing.T) {
+	s := InitTestServer(".testbasicreminder")
+	s.GoServer.KSclient.Fail = true
+
+	// Pretty much a place holder
+	s.runOnce()
+}
+
 func TestBasicReminderHalfYearly(t *testing.T) {
 	s := InitTestServer(".testbasicreminder")
 
