@@ -32,6 +32,7 @@ type Server struct {
 	pushFailure  string
 	silence      silence
 	running      bool
+	test         bool
 }
 
 var (
@@ -90,6 +91,9 @@ type gsGHBridge struct {
 }
 
 func (s *Server) pingServer(ctx context.Context, server string) error {
+	if s.test {
+		return nil
+	}
 	conn, err := s.FDialServer(ctx, server)
 	if err != nil {
 		return err
@@ -174,7 +178,7 @@ func (s *Server) save(ctx context.Context, config *pb.ReminderConfig) error {
 
 // InitServer builds an initial server
 func InitServer() *Server {
-	server := &Server{GoServer: &goserver.GoServer{}, data: &pb.ReminderConfig{List: &pb.ReminderList{Reminders: make([]*pb.Reminder, 0)}, Tasks: make([]*pb.TaskList, 0)}}
+	server := &Server{GoServer: &goserver.GoServer{}, data: &pb.ReminderConfig{List: &pb.ReminderList{Reminders: make([]*pb.Reminder, 0)}}}
 	server.ghbridge = gsGHBridge{dial: server.FDialServer, log: server.Log}
 	server.silence = &prodSilence{dial: server.FDialServer}
 
@@ -193,7 +197,6 @@ func (s *Server) loadReminders(ctx context.Context) (*pb.ReminderConfig, error) 
 
 	config = data.(*pb.ReminderConfig)
 
-	tasklistSize.Set(float64(len(config.GetTasks())))
 	taskSize.Set(float64(len(config.GetList().GetReminders())))
 
 	return config, nil
@@ -221,9 +224,7 @@ func (s *Server) ReportHealth() bool {
 
 // GetState gets the state of the server
 func (s *Server) GetState() []*pbg.State {
-	return []*pbg.State{
-		&pbg.State{Key: "blah", Value: int64(26)},
-	}
+	return []*pbg.State{}
 }
 
 func main() {
