@@ -81,9 +81,7 @@ func (s *Server) adjustRunTime(r *pb.Reminder) {
 		case pb.Reminder_DAILY:
 			ct = t.Add(time.Hour * 24)
 		case pb.Reminder_WEEKLY:
-			for (r.DayOfWeek != "" && ct.Weekday().String() != r.DayOfWeek) || ct.Before(t) {
-				ct = ct.AddDate(0, 0, 1)
-			}
+			ct = t.Add(time.Hour * 24 * 7)
 		case pb.Reminder_BIWEEKLY:
 			ct = t.Add(time.Hour * 24 * 14)
 		case pb.Reminder_MONTHLY:
