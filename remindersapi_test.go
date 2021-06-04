@@ -53,6 +53,9 @@ func (githubBridge testGHBridge) addIssue(ctx context.Context, t *pb.Reminder) (
 	if val, ok := githubBridge.issues[t.GetText()]; ok {
 		return val, nil
 	}
+
+	githubBridge.issues[t.GetText()] = "blah"
+
 	return "added", nil
 }
 
