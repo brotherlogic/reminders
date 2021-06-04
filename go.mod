@@ -7,6 +7,7 @@ require (
 	github.com/brotherlogic/githubcard v0.0.0-20201205192049-f6e63a2a7d72
 	github.com/brotherlogic/gobuildslave v0.0.0-20210602144845-3668b9c969f1 // indirect
 	github.com/brotherlogic/goserver v0.0.0-20210517140105-372f30a83363
+	github.com/brotherlogic/keystore v0.0.0-20201029130503-da423c07fd79
 	github.com/golang/protobuf v1.5.2
 	github.com/prometheus/client_golang v1.10.0
 	github.com/prometheus/common v0.27.0 // indirect

@@ -39,6 +39,10 @@ var (
 		Name: "reminders_tasklist",
 		Help: "The size of the print queue",
 	})
+	taskSize = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "reminders_task",
+		Help: "The size of the print queue",
+	})
 )
 
 const (
@@ -202,6 +206,7 @@ func (s *Server) loadReminders(ctx context.Context) (*pb.ReminderConfig, error) 
 	config = data.(*pb.ReminderConfig)
 
 	tasklistSize.Set(float64(len(config.GetTasks())))
+	taskSize.Set(float64(len(config.GetList().GetReminders())))
 
 	return config, nil
 }
