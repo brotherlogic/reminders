@@ -73,30 +73,25 @@ func (s *Server) adjustRunTime(r *pb.Reminder) {
 	s.Log(fmt.Sprintf("Adjusting for %v", r.Text))
 	t := time.Now()
 	ct := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
-	_, week := ct.ISOWeek()
 
 	if r.RepeatPeriodInSeconds > 0 {
 		r.NextRunTime = t.Unix() + r.RepeatPeriodInSeconds
 	} else {
 		switch r.RepeatPeriod {
 		case pb.Reminder_DAILY:
-			ct = ct.AddDate(0, 0, 1)
+			ct = t.Add(time.Hour * 24)
 		case pb.Reminder_WEEKLY:
 			for (r.DayOfWeek != "" && ct.Weekday().String() != r.DayOfWeek) || ct.Before(t) {
 				ct = ct.AddDate(0, 0, 1)
 			}
 		case pb.Reminder_BIWEEKLY:
-			for (r.DayOfWeek != "" && ct.Weekday().String() != r.DayOfWeek) || week%2 == 0 || ct.Before(t) {
-				ct = ct.AddDate(0, 0, 1)
-				_, week = ct.ISOWeek()
-			}
-
+			ct = t.Add(time.Hour * 24 * 14)
 		case pb.Reminder_MONTHLY:
-			ct = ct.AddDate(0, 1, 0)
+			ct = t.AddDate(0, 1, 0)
 		case pb.Reminder_YEARLY:
-			ct = ct.AddDate(1, 0, 0)
+			ct = t.AddDate(1, 0, 0)
 		case pb.Reminder_HALF_YEARLY:
-			ct = ct.AddDate(0, 6, 0)
+			ct = t.AddDate(0, 6, 0)
 		}
 
 		r.NextRunTime = ct.Unix()
