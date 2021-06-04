@@ -19,7 +19,6 @@ const _ = grpc.SupportPackageIsVersion7
 type RemindersClient interface {
 	AddReminder(ctx context.Context, in *Reminder, opts ...grpc.CallOption) (*Empty, error)
 	ListReminders(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ReminderConfig, error)
-	AddTaskList(ctx context.Context, in *TaskList, opts ...grpc.CallOption) (*Empty, error)
 	DeleteTask(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 }
 
@@ -49,15 +48,6 @@ func (c *remindersClient) ListReminders(ctx context.Context, in *Empty, opts ...
 	return out, nil
 }
 
-func (c *remindersClient) AddTaskList(ctx context.Context, in *TaskList, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/reminders.Reminders/AddTaskList", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *remindersClient) DeleteTask(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
 	out := new(DeleteResponse)
 	err := c.cc.Invoke(ctx, "/reminders.Reminders/DeleteTask", in, out, opts...)
@@ -73,7 +63,6 @@ func (c *remindersClient) DeleteTask(ctx context.Context, in *DeleteRequest, opt
 type RemindersServer interface {
 	AddReminder(context.Context, *Reminder) (*Empty, error)
 	ListReminders(context.Context, *Empty) (*ReminderConfig, error)
-	AddTaskList(context.Context, *TaskList) (*Empty, error)
 	DeleteTask(context.Context, *DeleteRequest) (*DeleteResponse, error)
 }
 
@@ -86,9 +75,6 @@ func (UnimplementedRemindersServer) AddReminder(context.Context, *Reminder) (*Em
 }
 func (UnimplementedRemindersServer) ListReminders(context.Context, *Empty) (*ReminderConfig, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListReminders not implemented")
-}
-func (UnimplementedRemindersServer) AddTaskList(context.Context, *TaskList) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddTaskList not implemented")
 }
 func (UnimplementedRemindersServer) DeleteTask(context.Context, *DeleteRequest) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTask not implemented")
@@ -141,24 +127,6 @@ func _Reminders_ListReminders_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Reminders_AddTaskList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TaskList)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RemindersServer).AddTaskList(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/reminders.Reminders/AddTaskList",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RemindersServer).AddTaskList(ctx, req.(*TaskList))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Reminders_DeleteTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteRequest)
 	if err := dec(in); err != nil {
@@ -188,10 +156,6 @@ var _Reminders_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListReminders",
 			Handler:    _Reminders_ListReminders_Handler,
-		},
-		{
-			MethodName: "AddTaskList",
-			Handler:    _Reminders_AddTaskList_Handler,
 		},
 		{
 			MethodName: "DeleteTask",

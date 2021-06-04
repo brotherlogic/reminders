@@ -38,21 +38,6 @@ func (s *Server) ListReminders(ctx context.Context, in *pb.Empty) (*pb.ReminderC
 	return config, nil
 }
 
-//AddTaskList adds a task list into the system
-func (s *Server) AddTaskList(ctx context.Context, in *pb.TaskList) (*pb.Empty, error) {
-	//Ensure all tasks in the list are unassigned
-	for _, task := range in.GetTasks().GetReminders() {
-		task.CurrentState = pb.Reminder_UNASSIGNED
-		task.Uid = time.Now().UnixNano()
-	}
-
-	s.data.Tasks = append(s.data.Tasks, in)
-	//s.save(ctx)
-	go s.processTaskList(ctx, in)
-
-	return &pb.Empty{}, nil
-}
-
 //DeleteTask deletes a task
 func (s *Server) DeleteTask(ctx context.Context, in *pb.DeleteRequest) (*pb.DeleteResponse, error) {
 	config, err := s.loadReminders(ctx)

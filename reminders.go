@@ -178,7 +178,7 @@ func (s *Server) save(ctx context.Context, config *pb.ReminderConfig) error {
 
 // InitServer builds an initial server
 func InitServer() *Server {
-	server := &Server{GoServer: &goserver.GoServer{}, data: &pb.ReminderConfig{List: &pb.ReminderList{Reminders: make([]*pb.Reminder, 0)}, Tasks: make([]*pb.TaskList, 0)}}
+	server := &Server{GoServer: &goserver.GoServer{}, data: &pb.ReminderConfig{List: &pb.ReminderList{Reminders: make([]*pb.Reminder, 0)}}}
 	server.ghbridge = gsGHBridge{dial: server.FDialServer, log: server.Log}
 	server.silence = &prodSilence{dial: server.FDialServer}
 
@@ -197,7 +197,6 @@ func (s *Server) loadReminders(ctx context.Context) (*pb.ReminderConfig, error) 
 
 	config = data.(*pb.ReminderConfig)
 
-	tasklistSize.Set(float64(len(config.GetTasks())))
 	taskSize.Set(float64(len(config.GetList().GetReminders())))
 
 	return config, nil

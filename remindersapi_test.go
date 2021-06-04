@@ -60,7 +60,7 @@ func (githubBridge testGHBridge) addIssue(ctx context.Context, t *pb.Reminder) (
 }
 
 func InitTestServer(foldername string) *Server {
-	server := &Server{data: &pb.ReminderConfig{List: &pb.ReminderList{Reminders: make([]*pb.Reminder, 0)}, Tasks: make([]*pb.TaskList, 0)}, ghbridge: testGHBridge{completes: make(map[string]bool), issues: make(map[string]string)}}
+	server := &Server{data: &pb.ReminderConfig{List: &pb.ReminderList{Reminders: make([]*pb.Reminder, 0)}}, ghbridge: testGHBridge{completes: make(map[string]bool), issues: make(map[string]string)}}
 	server.GoServer = &goserver.GoServer{}
 	server.SkipLog = true
 	server.SkipIssue = true
@@ -70,98 +70,6 @@ func InitTestServer(foldername string) *Server {
 	server.silence = &testSilence{}
 	server.test = true
 	return server
-}
-
-func TestAddTaskListWithFail(t *testing.T) {
-	s := InitTestServer(".testaddtasklist")
-	s.ghbridge = testGHBridge{fail: true}
-	_, err := s.AddTaskList(context.Background(), &pb.TaskList{Name: "Testing", Tasks: &pb.ReminderList{Reminders: []*pb.Reminder{&pb.Reminder{Text: "This is Task One"}, &pb.Reminder{Text: "This is Task Two"}}}})
-	s.refresh(context.Background())
-	if err != nil {
-		t.Fatalf("Error adding task list: %v", err)
-	}
-
-	if s.pushFail != 1 {
-		t.Errorf("Fail did not increment fail count: %v", s.pushFail)
-	}
-}
-
-func TestAddTaskList(t *testing.T) {
-	s := InitTestServer(".testaddtasklist")
-	s.AddReminder(context.Background(), &pb.Reminder{Text: "This is a regular reminder", DayOfWeek: "Sunday"})
-	s.ghbridge.(testGHBridge).issues["This is Task One"] = "issue1"
-	s.ghbridge.(testGHBridge).issues["This is Task Two"] = "issue2"
-	log.Printf("BRIDGE: %v", s.ghbridge)
-	_, err := s.AddTaskList(context.Background(), &pb.TaskList{Name: "Testing", Tasks: &pb.ReminderList{Reminders: []*pb.Reminder{&pb.Reminder{Text: "This is Task One", Silences: []string{"test"}}, &pb.Reminder{Text: "This is Task Two"}}}})
-	if err != nil {
-		t.Fatalf("Error adding task list: %v", err)
-	}
-
-	// Sleep to allow stuff to process
-	time.Sleep(time.Second)
-
-	log.Printf("BRIDGE IS %v", s.ghbridge)
-	if s.last.Service != "issue1" {
-		t.Errorf("Reminders were not created: %v", s.last)
-	}
-
-	s.refresh(context.Background())
-	s.ghbridge.(testGHBridge).completes["This is Task One"] = true
-	s.refresh(context.Background())
-
-	if s.last.Service != "issue2" {
-		t.Errorf("Reminders were not refreshed: %v", s.last)
-	}
-}
-
-func TestAddTaskListWithSilenceRemoveFail(t *testing.T) {
-	s := InitTestServer(".testaddtasklist")
-	s.AddReminder(context.Background(), &pb.Reminder{Text: "This is a regular reminder", DayOfWeek: "Sunday"})
-	s.ghbridge.(testGHBridge).issues["This is Task One"] = "issue1"
-	s.ghbridge.(testGHBridge).issues["This is Task Two"] = "issue2"
-	s.silence = &testSilence{failRem: true}
-	log.Printf("BRIDGE: %v", s.ghbridge)
-	_, err := s.AddTaskList(context.Background(), &pb.TaskList{Name: "Testing", Tasks: &pb.ReminderList{Reminders: []*pb.Reminder{&pb.Reminder{Text: "This is Task One", Silences: []string{"test"}}, &pb.Reminder{Text: "This is Task Two"}}}})
-	if err != nil {
-		t.Fatalf("Error adding task list: %v", err)
-	}
-
-	// Sleep to allow stuff to process
-	time.Sleep(time.Second)
-
-	log.Printf("BRIDGE IS %v", s.ghbridge)
-	if s.last.Service != "issue1" {
-		t.Errorf("Reminders were not created: %v", s.last)
-	}
-
-	s.refresh(context.Background())
-	s.ghbridge.(testGHBridge).completes["This is Task One"] = true
-	s.refresh(context.Background())
-
-	if s.last.Service == "issue1" {
-		t.Errorf("Reminders were not refreshed: %v", s.last)
-	}
-}
-
-func TestAddTaskListWithSilenceFail(t *testing.T) {
-	s := InitTestServer(".testaddtasklist")
-	s.AddReminder(context.Background(), &pb.Reminder{Text: "This is a regular reminder", DayOfWeek: "Sunday"})
-	s.ghbridge.(testGHBridge).issues["This is Task One"] = "issue1"
-	s.ghbridge.(testGHBridge).issues["This is Task Two"] = "issue2"
-	s.silence = &testSilence{failAdd: true}
-	log.Printf("BRIDGE: %v", s.ghbridge)
-	_, err := s.AddTaskList(context.Background(), &pb.TaskList{Name: "Testing", Tasks: &pb.ReminderList{Reminders: []*pb.Reminder{&pb.Reminder{Text: "This is Task One", Silences: []string{"test"}}, &pb.Reminder{Text: "This is Task Two"}}}})
-	if err != nil {
-		t.Fatalf("Error adding task list: %v", err)
-	}
-
-	// Sleep to allow stuff to process
-	time.Sleep(time.Second)
-
-	log.Printf("BRIDGE IS %v", s.ghbridge)
-	if s.last != nil {
-		t.Errorf("Reminders were created: %v", s.last)
-	}
 }
 
 func TestAddList(t *testing.T) {
