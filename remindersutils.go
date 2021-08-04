@@ -50,7 +50,7 @@ func (s *Server) writeReminder(ctx context.Context, reminder *pb.Reminder) (err 
 }
 
 func (s *Server) runOnce() {
-	ctx, cancel := utils.ManualContext("reminder-loop", "reminder-loop", time.Minute*30, true)
+	ctx, cancel := utils.ManualContext("reminder-loop", time.Minute*30)
 	defer cancel()
 
 	config, err := s.loadReminders(ctx)

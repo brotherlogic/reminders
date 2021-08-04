@@ -1,12 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/brotherlogic/goserver/utils"
@@ -39,12 +37,6 @@ func main() {
 			for i, reminder := range rs.List.Reminders {
 				fmt.Printf("%v. %v\n", i, reminder)
 			}
-			for i, task := range rs.Tasks {
-				fmt.Printf("%v. %v\n", i, task.Name)
-				for j, item := range task.Tasks.Reminders {
-					fmt.Printf("%v.%v. %v\n", i, j, item)
-				}
-			}
 		case "server":
 			reminder := os.Args[2]
 			_, err = client.AddReminder(ctx, &pb.Reminder{Server: reminder, RepeatPeriodInSeconds: int64((time.Hour * 24 * 14).Seconds())})
@@ -57,26 +49,7 @@ func main() {
 			if err != nil {
 				log.Fatalf("Unable to add reminder: %v", err)
 			}
-		case "file":
-			list := &pb.ReminderList{Reminders: make([]*pb.Reminder, 0)}
-			file, err := os.Open(os.Args[2])
-			if err != nil {
-				log.Fatalf("Error reading file: %v", err)
-			}
-			defer file.Close()
 
-			scanner := bufio.NewScanner(file)
-			scanner.Scan()
-			silences := strings.Split(scanner.Text(), ",")
-			for scanner.Scan() {
-				elems := strings.Split(scanner.Text(), "~")
-				list.Reminders = append(list.Reminders, &pb.Reminder{Text: elems[0], GithubComponent: elems[1], Silences: silences})
-			}
-
-			_, err = client.AddTaskList(ctx, &pb.TaskList{Name: os.Args[2], Tasks: list})
-			if err != nil {
-				log.Fatalf("Error adding tasks: %v", err)
-			}
 		case "delete":
 			uid, err := strconv.Atoi(os.Args[2])
 			if err != nil {
