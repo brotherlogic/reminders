@@ -53,6 +53,14 @@ func (s *Server) runOnce() {
 	ctx, cancel := utils.ManualContext("reminder-loop", time.Minute*30)
 	defer cancel()
 
+	key, err := s.RunLockingElection(ctx, "reminder-loop")
+	if err != nil {
+		s.Log(fmt.Sprintf("Unable to lect: %v", err))
+		return
+	}
+
+	defer s.ReleaseLockingElection(ctx, "reminder-loop", key)
+
 	config, err := s.loadReminders(ctx)
 	if err != nil {
 		s.Log(fmt.Sprintf("Unable to load reminders: %v", err))
