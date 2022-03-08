@@ -45,13 +45,13 @@ func main() {
 			}
 		case "add":
 			reminder := os.Args[2]
-			_, err = client.AddReminder(ctx, &pb.Reminder{Text: reminder, RepeatPeriodInSeconds: int64((time.Hour * 24 * 30*2).Seconds())})
+			_, err = client.AddReminder(ctx, &pb.Reminder{Text: reminder, RepeatPeriodInSeconds: int64((time.Hour * 24 * 14).Seconds())})
 			if err != nil {
 				log.Fatalf("Unable to add reminder: %v", err)
 			}
 
 		case "delete":
-					uid, err := strconv.ParseInt(os.Args[2], 10, 64)
+			uid, err := strconv.ParseInt(os.Args[2], 10, 64)
 			if err != nil {
 				log.Fatalf("Unable to convert UID: %v", err)
 			}
