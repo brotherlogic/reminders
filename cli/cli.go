@@ -39,13 +39,13 @@ func main() {
 			}
 		case "server":
 			reminder := os.Args[2]
-			_, err = client.AddReminder(ctx, &pb.Reminder{Server: reminder, RepeatPeriodInSeconds: int64((time.Hour * 24 * 14).Seconds())})
+			_, err = client.AddReminder(ctx, &pb.Reminder{Server: reminder, RepeatPeriodInSeconds: int64((time.Hour * 24 * 7).Seconds())})
 			if err != nil {
 				log.Fatalf("Unable to add reminder: %v", err)
 			}
 		case "add":
 			reminder := os.Args[2]
-			_, err = client.AddReminder(ctx, &pb.Reminder{Text: reminder, RepeatPeriodInSeconds: int64((time.Hour * 24).Seconds())})
+			_, err = client.AddReminder(ctx, &pb.Reminder{Text: reminder, RepeatPeriodInSeconds: int64((time.Hour * 24 * 14).Seconds())})
 			if err != nil {
 				log.Fatalf("Unable to add reminder: %v", err)
 			}
