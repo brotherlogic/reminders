@@ -175,7 +175,7 @@ func InitServer() *Server {
 	server.ghbridge = gsGHBridge{dial: server.FDialServer, log: server.Log}
 	server.silence = &prodSilence{dial: server.FDialServer}
 
-	server.PrepServer()
+	server.PrepServer("reminders")
 
 	return server
 }
@@ -233,7 +233,7 @@ func main() {
 	server := InitServer()
 	server.Register = server
 
-	err := server.RegisterServerV2("reminders", false, true)
+	err := server.RegisterServerV2(false)
 	if err != nil {
 		return
 	}

@@ -45,7 +45,7 @@ func main() {
 			}
 		case "add":
 			reminder := os.Args[2]
-			_, err = client.AddReminder(ctx, &pb.Reminder{Text: reminder, RepeatPeriodInSeconds: int64((time.Hour * 24 * 14).Seconds())})
+			_, err = client.AddReminder(ctx, &pb.Reminder{Text: reminder, RepeatPeriodInSeconds: int64((time.Hour * 24 * 30).Seconds())})
 			if err != nil {
 				log.Fatalf("Unable to add reminder: %v", err)
 			}
