@@ -17,6 +17,7 @@ import (
 
 	pbgh "github.com/brotherlogic/githubcard/proto"
 	pbg "github.com/brotherlogic/goserver/proto"
+	"github.com/brotherlogic/goserver/utils"
 	pb "github.com/brotherlogic/reminders/proto"
 )
 
@@ -87,7 +88,7 @@ func (ps *prodSilence) removeSilence(ctx context.Context, key string) error {
 
 type gsGHBridge struct {
 	dial func(ctx context.Context, server string) (*grpc.ClientConn, error)
-	log  func(logs string)
+	log  func(ctx context.Context, logs string)
 }
 
 func (s *Server) pingServer(ctx context.Context, server string) error {
@@ -107,9 +108,11 @@ func (s *Server) pingServer(ctx context.Context, server string) error {
 
 func (s *Server) run() {
 	for s.running {
+		ctx, cancel := utils.ManualContext("reminderrun", time.Minute)
 		nextRunTime := s.runFull()
 		sleepTime := nextRunTime.Sub(time.Now())
-		s.Log(fmt.Sprintf("Sleeping for %v", sleepTime))
+		s.CtxLog(ctx, fmt.Sprintf("Sleeping for %v", sleepTime))
+		cancel()
 		time.Sleep(sleepTime)
 	}
 }
@@ -142,7 +145,7 @@ func (g gsGHBridge) addIssue(ctx context.Context, r *pb.Reminder) (string, error
 func (g gsGHBridge) isComplete(ctx context.Context, r *pb.Reminder) bool {
 	conn, err := g.dial(ctx, "githubcard")
 	if err != nil {
-		g.log(fmt.Sprintf("DIAL FAIL: %v", err))
+		g.log(ctx, fmt.Sprintf("DIAL FAIL: %v", err))
 		return false
 	}
 	defer conn.Close()
@@ -152,16 +155,16 @@ func (g gsGHBridge) isComplete(ctx context.Context, r *pb.Reminder) bool {
 	num, _ := strconv.Atoi(elems[1])
 	if len(elems[0]) == 0 || num == 0 {
 		//Can't process this, so just return true
-		g.log(fmt.Sprintf("UNPROCESSABLE: %v %v", elems[0], num))
+		g.log(ctx, fmt.Sprintf("UNPROCESSABLE: %v %v", elems[0], num))
 		return true
 	}
 	resp, err := client.Get(ctx, &pbgh.Issue{Number: int32(num), Service: elems[0]})
 	if err != nil {
-		g.log(fmt.Sprintf("ERRORED: %v", err))
+		g.log(ctx, fmt.Sprintf("ERRORED: %v", err))
 		return false
 	}
 
-	g.log(fmt.Sprintf("GOT RESPONSE: %v", resp))
+	g.log(ctx, fmt.Sprintf("GOT RESPONSE: %v", resp))
 	return resp.GetState() == pbgh.Issue_CLOSED
 }
 
@@ -172,7 +175,7 @@ func (s *Server) save(ctx context.Context, config *pb.ReminderConfig) error {
 // InitServer builds an initial server
 func InitServer() *Server {
 	server := &Server{GoServer: &goserver.GoServer{}, data: &pb.ReminderConfig{List: &pb.ReminderList{Reminders: make([]*pb.Reminder, 0)}}}
-	server.ghbridge = gsGHBridge{dial: server.FDialServer, log: server.Log}
+	server.ghbridge = gsGHBridge{dial: server.FDialServer, log: server.CtxLog}
 	server.silence = &prodSilence{dial: server.FDialServer}
 
 	server.PrepServer("reminders")

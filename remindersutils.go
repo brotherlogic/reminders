@@ -11,8 +11,8 @@ import (
 	pb "github.com/brotherlogic/reminders/proto"
 )
 
-func (s *Server) adjustRunTime(r *pb.Reminder) {
-	s.Log(fmt.Sprintf("Adjusting for %v", r.Text))
+func (s *Server) adjustRunTime(ctx context.Context, r *pb.Reminder) {
+	s.CtxLog(ctx, fmt.Sprintf("Adjusting for %v", r.Text))
 	t := time.Now()
 	ct := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 
@@ -41,10 +41,10 @@ func (s *Server) adjustRunTime(r *pb.Reminder) {
 func (s *Server) writeReminder(ctx context.Context, reminder *pb.Reminder) (err error) {
 	if len(reminder.GetServer()) == 0 {
 		blah, err := s.ghbridge.addIssue(ctx, reminder)
-		s.Log(fmt.Sprintf("Added reminder %v -> %v", blah, err))
+		s.CtxLog(ctx, fmt.Sprintf("Added reminder %v -> %v", blah, err))
 	} else {
 		err := s.pingServer(ctx, reminder.GetServer())
-		s.Log(fmt.Sprintf("Pinged %v -> %v", reminder.GetServer(), err))
+		s.CtxLog(ctx, fmt.Sprintf("Pinged %v -> %v", reminder.GetServer(), err))
 	}
 	return err
 }
@@ -55,7 +55,7 @@ func (s *Server) runOnce() {
 
 	key, err := s.RunLockingElection(ctx, "reminder-loop", "locking for reminders")
 	if err != nil {
-		s.Log(fmt.Sprintf("Unable to lect: %v", err))
+		s.CtxLog(ctx, fmt.Sprintf("Unable to lect: %v", err))
 		return
 	}
 
@@ -63,7 +63,7 @@ func (s *Server) runOnce() {
 
 	config, err := s.loadReminders(ctx)
 	if err != nil {
-		s.Log(fmt.Sprintf("Unable to load reminders: %v", err))
+		s.CtxLog(ctx, fmt.Sprintf("Unable to load reminders: %v", err))
 		return
 	}
 
@@ -74,7 +74,7 @@ func (s *Server) runOnce() {
 	if len(config.List.Reminders) > 0 && time.Now().After(time.Unix(config.List.Reminders[0].GetNextRunTime(), 0)) {
 		err := s.writeReminder(ctx, config.List.Reminders[0])
 		if err == nil {
-			s.adjustRunTime(config.List.Reminders[0])
+			s.adjustRunTime(ctx, config.List.Reminders[0])
 			s.save(ctx, config)
 		}
 	}
