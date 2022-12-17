@@ -3,7 +3,7 @@ module github.com/brotherlogic/reminders
 go 1.16
 
 require (
-	github.com/brotherlogic/buildserver v0.0.0-20221217231052-6c30c9a7b7d3 // indirect
+	github.com/brotherlogic/discovery v0.0.0-20221217231554-a7b0521f3549 // indirect
 	github.com/brotherlogic/githubcard v0.0.0-20221211032956-b40a80581d2d
 	github.com/brotherlogic/goserver v0.0.0-20221217002224-0ba5c0213be1
 	github.com/brotherlogic/keystore v0.0.0-20221217221704-68000096bdab
