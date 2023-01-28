@@ -3,24 +3,24 @@ module github.com/brotherlogic/reminders
 go 1.19
 
 require (
-	github.com/brotherlogic/githubcard v0.0.0-20230101072631-dcc4a0e0d7ed
-	github.com/brotherlogic/goserver v0.0.0-20230106225431-4d4abea9318a
-	github.com/brotherlogic/keystore v0.0.0-20230108052654-392c7a9b9675
+	github.com/brotherlogic/githubcard v0.0.0-20230127023747-27c0e83f71f8
+	github.com/brotherlogic/goserver v0.0.0-20230117181550-4c6661b17d53
+	github.com/brotherlogic/keystore v0.0.0-20230127024524-a987822bb7b0
 	github.com/golang/protobuf v1.5.2
 	github.com/prometheus/client_golang v1.14.0
 	golang.org/x/net v0.5.0
-	google.golang.org/grpc v1.51.0
+	google.golang.org/grpc v1.52.3
 	google.golang.org/protobuf v1.28.1
 )
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/brotherlogic/buildserver v0.0.0-20230108034220-e8f7fb54466c // indirect
-	github.com/brotherlogic/datastore v0.0.0-20230108044309-80a59f72b29b // indirect
-	github.com/brotherlogic/discovery v0.0.0-20230105182040-04b2f40a21ed // indirect
-	github.com/brotherlogic/dstore v0.0.0-20230101070316-8cbb6f580f4f // indirect
-	github.com/brotherlogic/gobuildslave v0.0.0-20230104192933-16ebfc7ca538 // indirect
-	github.com/brotherlogic/lock v0.0.0-20230103180730-bb452b6fe70f // indirect
+	github.com/brotherlogic/buildserver v0.0.0-20230127230943-7858efe83402 // indirect
+	github.com/brotherlogic/datastore v0.0.0-20230118231105-ee668be05973 // indirect
+	github.com/brotherlogic/discovery v0.0.0-20230124013835-acc24a684fd7 // indirect
+	github.com/brotherlogic/dstore v0.0.0-20230123174636-131399911991 // indirect
+	github.com/brotherlogic/gobuildslave v0.0.0-20230117181720-516784a20890 // indirect
+	github.com/brotherlogic/lock v0.0.0-20230122004702-040892524789 // indirect
 	github.com/brotherlogic/logging v0.0.0-20230108082501-1829ce3e39d8 // indirect
 	github.com/brotherlogic/monitor v0.0.0-20221025152653-c10877c5f9e6 // indirect
 	github.com/brotherlogic/versionserver v0.0.0-20221025154054-c9bcd41be2f2 // indirect
@@ -41,5 +41,5 @@ require (
 	go.opentelemetry.io/otel/trace v1.11.2 // indirect
 	golang.org/x/sys v0.4.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
-	google.golang.org/genproto v0.0.0-20230106154932-a12b697841d9 // indirect
+	google.golang.org/genproto v0.0.0-20230127162408-596548ed4efa // indirect
 )

@@ -134,7 +134,11 @@ func (g gsGHBridge) addIssue(ctx context.Context, r *pb.Reminder) (string, error
 	if r.GetGithubComponent() == "" {
 		r.GithubComponent = "home"
 	}
-	resp, err := client.AddIssue(ctx, &pbgh.Issue{Service: r.GetGithubComponent(), Title: r.GetText(), Body: "From your reminders"})
+	resp, err := client.AddIssue(ctx, &pbgh.Issue{
+		Service:          r.GetGithubComponent(),
+		Title:            r.GetText(),
+		PrintImmediately: false,
+		Body:             "From your reminders"})
 	if err != nil {
 		return "", err
 	}
