@@ -64,6 +64,7 @@ func InitTestServer(foldername string) *Server {
 	server.GoServer = &goserver.GoServer{}
 	server.SkipLog = true
 	server.SkipIssue = true
+	server.SkipElect = true
 	server.Register = server
 	server.GoServer.KSclient = *keystoreclient.GetTestClient(foldername)
 	server.GoServer.KSclient.Save(context.Background(), KEY, &pb.ReminderConfig{})
