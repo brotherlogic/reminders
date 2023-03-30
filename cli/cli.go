@@ -59,7 +59,7 @@ func main() {
 			if err != nil {
 				log.Fatalf("Delete failed: %v", err)
 			}
-			log.Printf("Got here: %v", resp)
+			fmt.Printf("Got here: %v\n", resp)
 		}
 	}
 }
