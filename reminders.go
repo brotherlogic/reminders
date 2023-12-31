@@ -21,7 +21,7 @@ import (
 	pb "github.com/brotherlogic/reminders/proto"
 )
 
-//Server is the main server
+// Server is the main server
 type Server struct {
 	*goserver.GoServer
 	data         *pb.ReminderConfig
@@ -149,7 +149,7 @@ func (g gsGHBridge) addIssue(ctx context.Context, r *pb.Reminder) (string, error
 func (g gsGHBridge) isComplete(ctx context.Context, r *pb.Reminder) bool {
 	conn, err := g.dial(ctx, "githubcard")
 	if err != nil {
-		g.log(ctx, fmt.Sprintf("DIAL FAIL: %v", err))
+		g.log(ctx, fmt.Sprintf("Dial FAIL: %v", err))
 		return false
 	}
 	defer conn.Close()
