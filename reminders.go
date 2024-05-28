@@ -5,19 +5,23 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/brotherlogic/goserver"
+	"github.com/brotherlogic/goserver/utils"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
+	githubridgeclient "github.com/brotherlogic/githubridge/client"
+
 	pbgh "github.com/brotherlogic/githubcard/proto"
+	ghbpb "github.com/brotherlogic/githubridge/proto"
 	pbg "github.com/brotherlogic/goserver/proto"
-	"github.com/brotherlogic/goserver/utils"
 	pb "github.com/brotherlogic/reminders/proto"
 )
 
@@ -34,6 +38,7 @@ type Server struct {
 	silence      silence
 	running      bool
 	test         bool
+	ghclient     githubridgeclient.GithubridgeClient
 }
 
 var (
@@ -123,27 +128,23 @@ func (s *Server) runFull() time.Time {
 	return time.Now().Add(time.Minute)
 }
 
-func (g gsGHBridge) addIssue(ctx context.Context, r *pb.Reminder) (string, error) {
-	conn, err := g.dial(ctx, "githubcard")
-	if err != nil {
-		return "", err
-	}
-	defer conn.Close()
-
-	client := pbgh.NewGithubClient(conn)
+func (s *Server) addIssue(ctx context.Context, r *pb.Reminder) (string, error) {
 	if r.GetGithubComponent() == "" {
 		r.GithubComponent = "home"
 	}
-	resp, err := client.AddIssue(ctx, &pbgh.Issue{
-		Service:          r.GetGithubComponent(),
-		Title:            r.GetText(),
-		PrintImmediately: false,
-		Body:             "From your reminders"})
+
+	resp, err := s.ghclient.CreateIssue(ctx, &ghbpb.CreateIssueRequest{
+		Repo:  r.GetGithubComponent(),
+		Title: r.GetText(),
+		Body:  "From your reminders",
+		User:  "brotherlogic",
+	})
+
 	if err != nil {
 		return "", err
 	}
 
-	return resp.GetService() + "/" + strconv.Itoa(int(resp.GetNumber())), nil
+	return r.GetGithubComponent() + "/" + strconv.Itoa(int(resp.GetIssueId())), nil
 }
 
 func (g gsGHBridge) isComplete(ctx context.Context, r *pb.Reminder) bool {
@@ -183,6 +184,19 @@ func InitServer() *Server {
 	server.silence = &prodSilence{dial: server.FDialServer}
 
 	server.PrepServer("reminders")
+
+	dirname, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatal(err)
+	}
+	password, err := os.ReadFile(fmt.Sprintf("%v/.ghb", dirname))
+	if err == nil {
+		client, err := githubridgeclient.GetClientExternal(string(password))
+		if err != nil {
+			panic(err)
+		}
+		server.ghclient = client
+	}
 
 	return server
 }

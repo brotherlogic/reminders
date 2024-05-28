@@ -40,7 +40,7 @@ func (s *Server) adjustRunTime(ctx context.Context, r *pb.Reminder) {
 
 func (s *Server) writeReminder(ctx context.Context, reminder *pb.Reminder) (err error) {
 	if len(reminder.GetServer()) == 0 {
-		blah, err := s.ghbridge.addIssue(ctx, reminder)
+		blah, err := s.addIssue(ctx, reminder)
 		s.CtxLog(ctx, fmt.Sprintf("Added reminder %v -> %v", blah, err))
 	} else {
 		err := s.pingServer(ctx, reminder.GetServer())
