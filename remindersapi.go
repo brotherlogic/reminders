@@ -10,10 +10,9 @@ import (
 
 type githubBridge interface {
 	isComplete(ctx context.Context, t *pb.Reminder) bool
-	addIssue(ctx context.Context, t *pb.Reminder) (string, error)
 }
 
-//AddReminder adds a reminder into the system
+// AddReminder adds a reminder into the system
 func (s *Server) AddReminder(ctx context.Context, in *pb.Reminder) (*pb.Empty, error) {
 	config, err := s.loadReminders(ctx)
 	if err != nil {
@@ -28,7 +27,7 @@ func (s *Server) AddReminder(ctx context.Context, in *pb.Reminder) (*pb.Empty, e
 	return &pb.Empty{}, s.save(ctx, config)
 }
 
-//ListReminders lists all the available reminders
+// ListReminders lists all the available reminders
 func (s *Server) ListReminders(ctx context.Context, in *pb.Empty) (*pb.ReminderConfig, error) {
 	config, err := s.loadReminders(ctx)
 	if err != nil {
@@ -38,7 +37,7 @@ func (s *Server) ListReminders(ctx context.Context, in *pb.Empty) (*pb.ReminderC
 	return config, nil
 }
 
-//DeleteTask deletes a task
+// DeleteTask deletes a task
 func (s *Server) DeleteTask(ctx context.Context, in *pb.DeleteRequest) (*pb.DeleteResponse, error) {
 	config, err := s.loadReminders(ctx)
 	if err != nil {
