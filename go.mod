@@ -5,7 +5,7 @@ go 1.22.7
 toolchain go1.23.0
 
 require (
-	github.com/brotherlogic/githubcard v0.0.0-20241201171517-8ae1530f545f
+	github.com/brotherlogic/githubcard v0.0.0-20241201185205-f6967c4ecee0
 	github.com/brotherlogic/githubridge v0.2816.0
 	github.com/brotherlogic/goserver v0.0.0-20240826215223-fccbac46b3d4
 	github.com/brotherlogic/keystore v0.0.0-20240508161349-814b3200b126
