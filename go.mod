@@ -3,7 +3,7 @@ module github.com/brotherlogic/reminders
 go 1.23.2
 
 require (
-	github.com/brotherlogic/githubcard v0.0.0-20241230143429-605aa235c49b
+	github.com/brotherlogic/githubcard v0.0.0-20241230163707-e036cae78b3c
 	github.com/brotherlogic/githubridge v0.2824.0
 	github.com/brotherlogic/goserver v0.0.0-20240826215223-fccbac46b3d4
 	github.com/brotherlogic/keystore v0.0.0-20240508161349-814b3200b126
@@ -19,7 +19,7 @@ require (
 	github.com/brotherlogic/buildserver v0.0.0-20241230153304-aec177c8cb1d // indirect
 	github.com/brotherlogic/datastore v0.0.0-20241220230045-434035a99d2b // indirect
 	github.com/brotherlogic/discovery v0.0.0-20241109204028-02908558af09 // indirect
-	github.com/brotherlogic/dstore v0.0.0-20241230161624-a154b7f75da4 // indirect
+	github.com/brotherlogic/dstore v0.0.0-20241230171643-3e63626110ac // indirect
 	github.com/brotherlogic/gobuildslave v0.0.0-20241111085829-8d4e5069a7fd // indirect
 	github.com/brotherlogic/lock v0.0.0-20241230153338-a983310a3fe6 // indirect
 	github.com/brotherlogic/logging v0.0.0-20241230141609-a134511cc605 // indirect
