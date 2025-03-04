@@ -9,14 +9,14 @@ require (
 	github.com/brotherlogic/keystore v0.0.0-20240508161349-814b3200b126
 	github.com/golang/protobuf v1.5.4
 	github.com/prometheus/client_golang v1.21.1
-	golang.org/x/net v0.35.0
-	google.golang.org/grpc v1.70.0
+	golang.org/x/net v0.36.0
+	google.golang.org/grpc v1.71.0
 	google.golang.org/protobuf v1.36.5
 )
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/brotherlogic/buildserver v0.0.0-20250304141849-f5fb9f2dc33d // indirect
+	github.com/brotherlogic/buildserver v0.0.0-20250304212710-7a56950bb1dd // indirect
 	github.com/brotherlogic/datastore v0.0.0-20250113225754-a9cab19c721e // indirect
 	github.com/brotherlogic/discovery v0.0.0-20241109204028-02908558af09 // indirect
 	github.com/brotherlogic/dstore v0.0.0-20250301014546-66ac2ee8d3e8 // indirect
