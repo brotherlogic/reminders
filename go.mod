@@ -4,7 +4,7 @@ go 1.24.4
 
 require (
 	github.com/brotherlogic/githubcard v0.0.0-20250711223628-6afb88694f07
-	github.com/brotherlogic/githubridge v0.2865.0
+	github.com/brotherlogic/githubridge v0.2866.0
 	github.com/brotherlogic/goserver v0.0.0-20250608182006-4ace595931a5
 	github.com/brotherlogic/keystore v0.0.0-20240508161349-814b3200b126
 	github.com/golang/protobuf v1.5.4
